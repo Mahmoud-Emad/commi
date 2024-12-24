@@ -27,13 +27,12 @@ LOGGER = setup_logger()
 def print_ultron_header():
     """Prints the banner for the application in color."""
     CYAN = "\033[0;36m"
-    GREEN = "\033[0;32m"
     RESET = "\033[0m"
+    # GREEN = "\033[0;32m"
     
     ultron_art = pyfiglet.figlet_format("Gultron", font="slant")
     print(f"{CYAN}{ultron_art}{RESET}")
-    print("-" * 50)
-    print(f"{GREEN}Welcome to Gultron, an AI-powered Git commit message generator tool!")
+    print("-" * 100)
+    print(f"Welcome to Gultron, an AI-powered Git commit message generator tool!")
     print("This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs.")
-    print("-" * 50)
-    print(f"{RESET}")
+    print("-" * 100)
