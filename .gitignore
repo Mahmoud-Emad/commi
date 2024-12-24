@@ -1,7 +1,7 @@
 .pytest_cache
 *__pycache__*
 .env
-gultron_*
+commi_*
 
 # Remove it whe the tests ready
 tests

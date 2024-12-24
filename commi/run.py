@@ -1,6 +1,6 @@
-from gultron.cmd import GultronCommands
-from gultron.commit_message import CommitMessageGenerator
-from gultron.logs import print_ultron_header, LOGGER
+from commi.cmd import CommiCommands
+from commi.commit_message import CommitMessageGenerator
+from commi.logs import print_ultron_header, LOGGER
 import os
 import sys
 import git
@@ -36,8 +36,8 @@ def commit_changes(repo, commit_message):
 def main():
     """Main entry point for the program."""
     print_ultron_header()
-    gultron_commands = GultronCommands()
-    args = gultron_commands.get_args()
+    commi_commands = CommiCommands()
+    args = commi_commands.get_args()
 
     # Load configuration from .env or default values
     API_KEY = config("API_KEY", default="AIzaSyA6IkFVB8FRwhwy5ZZbVjgLuS-Ye8JMF_I")

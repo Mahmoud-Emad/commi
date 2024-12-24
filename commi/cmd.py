@@ -1,7 +1,7 @@
 import argparse
-from gultron.logs import LOGGER
+from commi.logs import LOGGER
 
-class GultronCommands:
+class CommiCommands:
     def __init__(self):
         # Initialize argument parser
         self.parser = argparse.ArgumentParser(

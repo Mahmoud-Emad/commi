@@ -10,19 +10,19 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
-# Function to print Gultron ASCII art with optional coloring
-print_gultron_ascii() {
+# Function to print Commi ASCII art with optional coloring
+print_commi_ascii() {
     echo -e "${CYAN}"
-    poetry run python3 -c "import pyfiglet; print(pyfiglet.figlet_format('Gultron', font='slant'))"
+    poetry run python3 -c "import pyfiglet; print(pyfiglet.figlet_format('Commi', font='slant'))"
     echo -e "${RESET}"
 }
 
 # Function to print the description of the tool
-print_gultron_description() {
+print_commi_description() {
     echo -e "${GREEN}"
-    echo "Welcome to Gultron, an AI-powered Git commit message generator tool!"
+    echo "Welcome to Commi, an AI-powered Git commit message generator tool!"
     echo "This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs."
-    echo "For more details, visit: https://github.com/Mahmoud-Emad/gultron"
+    echo "For more details, visit: https://github.com/Mahmoud-Emad/commi"
     echo ""
     echo -e "${RESET}"
 }
@@ -77,13 +77,13 @@ install_poetry
 # Define the paths and filenames
 PYTHON_ENV=$(poetry env info -p)
 BIN_DIR="/usr/local/bin"
-OUTPUT_BINARY="gultron_$(date +'%Y%m%d%H%M%S')"
+OUTPUT_BINARY="commi_$(date +'%Y%m%d%H%M%S')"
 
 # Ensure required directories exist
 mkdir -p "$BIN_DIR"
 
 # Display initial message
-echo -e "${CYAN}Preparing to install Gultron...${RESET}"
+echo -e "${CYAN}Preparing to install Commi...${RESET}"
 
 # List of required dependencies
 required_packages=("colorlog" "gitpython" "google-generativeai" "pyfiglet" "pyperclip" "pytest" "python-decouple")
@@ -99,11 +99,11 @@ for package in "${required_packages[@]}"; do
 done
 
 # Build the binary
-echo -e "${YELLOW}Building the Gultron binary...${RESET}"
+echo -e "${YELLOW}Building the Commi binary...${RESET}"
 poetry run shiv --site-packages "$PYTHON_ENV/lib/python3.12/site-packages" \
     --output-file "$OUTPUT_BINARY" \
     --python '/usr/bin/env python3' \
-    --entry-point 'gultron.run:main'
+    --entry-point 'commi.run:main'
 
 # Check if the binary was successfully created
 if [ ! -f "$OUTPUT_BINARY" ]; then
@@ -112,8 +112,8 @@ if [ ! -f "$OUTPUT_BINARY" ]; then
 fi
 
 # Check if the binary already exists in the bin directory
-if [ -f "$BIN_DIR/gultron" ]; then
-    echo -e "${CYAN}A previous version of Gultron already exists in $BIN_DIR. Overwrite?${RESET}"
+if [ -f "$BIN_DIR/commi" ]; then
+    echo -e "${CYAN}A previous version of Commi already exists in $BIN_DIR. Overwrite?${RESET}"
     if ! ask_confirmation "Do you want to overwrite it?"; then
         echo -e "${GREEN}Installation canceled. No changes were made.${RESET}"
         exit 0
@@ -122,15 +122,15 @@ fi
 
 # Move the binary to the bin directory
 echo -e "${CYAN}Moving $OUTPUT_BINARY to $BIN_DIR...${RESET}"
-sudo cp "$OUTPUT_BINARY" "$BIN_DIR/gultron"
+sudo cp "$OUTPUT_BINARY" "$BIN_DIR/commi"
 
 # Make the binary executable
 echo -e "${CYAN}Making the binary executable...${RESET}"
-sudo chmod +x "$BIN_DIR/gultron"
+sudo chmod +x "$BIN_DIR/commi"
 
 # Verify the binary installation
-if ! command -v gultron &> /dev/null; then
-    echo -e "${RED}Error: Installation failed. 'gultron' command not found.${RESET}"
+if ! command -v commi &> /dev/null; then
+    echo -e "${RED}Error: Installation failed. 'commi' command not found.${RESET}"
     exit 1
 fi
 
@@ -140,19 +140,19 @@ rm -f "$OUTPUT_BINARY"
 # Clear the terminal
 clear
 
-# Print the Gultron ASCII header
-print_gultron_ascii
+# Print the Commi ASCII header
+print_commi_ascii
 
 # Print the description of the tool
-print_gultron_description
+print_commi_description
 
 # Display usage instructions
-echo -e "${GREEN}Gultron installed successfully!${RESET}"
+echo -e "${GREEN}Commi installed successfully!${RESET}"
 echo -e "\nUsage:\n"
 echo -e "${CYAN}1. Pass the required repository link:${RESET}"
-echo -e "   $ gultron --repo '${HOME}/example/repo'"
+echo -e "   $ commi --repo '${HOME}/example/repo'"
 echo -e "${CYAN}2. Optionally provide an API key:${RESET}"
-echo -e "   $ gultron --repo '${HOME}/example/repo' --api-key 'your_api_key'"
+echo -e "   $ commi --repo '${HOME}/example/repo' --api-key 'your_api_key'"
 echo -e "${CYAN}3. Or set the API key as an environment variable:${RESET}"
-echo -e "   $ export API_KEY='your_api_key' && gultron --repo '${HOME}/example/repo'"
+echo -e "   $ export API_KEY='your_api_key' && commi --repo '${HOME}/example/repo'"
 echo -e "${CYAN}If no API key is provided, a default value will be used.${RESET}"

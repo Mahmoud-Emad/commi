@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "gultron"
-version = "1.2.1"
+name = "commi"
+version = "1.2.2"
 description = "AI-powered Git commit message generator."
 authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
 readme = "README.md"
-packages = [{ include = "gultron" }]
+packages = [{ include = "commi" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -19,10 +19,10 @@ pytest = "^8.3.4"
 grpcio = "1.60.1"
 
 [tool.poetry.scripts]
-gultron = "gultron.run:main"
+commi = "commi.run:main"
 
 [tool.poetry.plugins."poetry.post-install"]
-"post-install" = "gultron.post_install:run"
+"post-install" = "commi.post_install:run"
 
 [build-system]
 requires = ["poetry-core"]
