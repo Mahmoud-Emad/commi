@@ -45,6 +45,35 @@ ask_confirmation() {
     done
 }
 
+# Function to detect the OS and install Poetry accordingly
+install_poetry() {
+    # Detect the operating system
+    os=$(uname -s)
+    case "$os" in
+        Linux)
+            # For Linux, install Poetry using the recommended method
+            if ! command -v poetry &>/dev/null; then
+                echo -e "${CYAN}Installing Poetry for Linux...${RESET}"
+                curl -sSL https://install.python-poetry.org | python3 -
+            fi
+            ;;
+        Darwin)
+            # For macOS, use Homebrew or the recommended install method
+            if ! command -v poetry &>/dev/null; then
+                echo -e "${CYAN}Installing Poetry for macOS...${RESET}"
+                brew install poetry
+            fi
+            ;;
+        *)
+            echo -e "${RED}Unsupported OS: $os${RESET}"
+            exit 1
+            ;;
+    esac
+}
+
+# Ensure Poetry is installed
+install_poetry
+
 # Define the paths and filenames
 PYTHON_ENV=$(poetry env info -p)
 BIN_DIR="/usr/local/bin"

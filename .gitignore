@@ -5,3 +5,4 @@ gultron_*
 
 # Remove it whe the tests ready
 tests
+dist

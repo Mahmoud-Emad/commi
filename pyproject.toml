@@ -6,7 +6,6 @@ authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
 readme = "README.md"
 packages = [{ include = "gultron" }]
 
-
 [tool.poetry.dependencies]
 python = "^3.12"
 gitpython = "^3.1.43"
@@ -20,9 +19,11 @@ pytest = "^8.3.4"
 grpcio = "1.60.1"
 
 [tool.poetry.scripts]
-gultron = "install:main"
+gultron = "gultron.main:run"
+
+[tool.poetry.plugins."poetry.post-install"]
+"post-install" = "gultron.post_install:run"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
