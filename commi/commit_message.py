@@ -49,7 +49,6 @@ class CommitMessageGenerator:
             commit_message = response.text.strip()
 
             # Validate if commit message follows the format
-            LOGGER.info(f"Generated Commit Message: {commit_message}")
             if not self._is_valid_commit_message(commit_message):
                 LOGGER.warning("Commit message does not follow the expected format. Regenerating...")
                 self.retry_count += 1
