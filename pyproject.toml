@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "gultron"
+version = "0.1.0"
+description = "AI-powered Git commit message generator."
+authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "gultron" }]
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+gitpython = "^3.1.43"
+google-generativeai = "^0.8.3"
+python-decouple = "^3.8"
+shiv = "^1.0.8"
+colorlog = "^6.9.0"
+pyfiglet = "^1.0.2"
+pyperclip = "^1.9.0"
+pytest = "^8.3.4"
+grpcio = "1.60.1"
+
+[tool.poetry.scripts]
+gultron = "install:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
