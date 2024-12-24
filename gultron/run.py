@@ -14,13 +14,31 @@ def validate_repo_path(path):
     except git.exc.InvalidGitRepositoryError:
         return False
 
+def commit_changes(repo, commit_message):
+    """Commits the generated commit message to the repository."""
+    try:
+        # Check if there are any changes to commit
+        if not repo.is_dirty(untracked_files=True):
+            LOGGER.warning("No changes to commit.")
+            return
+
+        # Stage all changes
+        repo.git.add(A=True)
+
+        # Commit with the generated commit message
+        repo.git.commit('-m', commit_message)
+        LOGGER.info(f"Committed changes with message: {commit_message}")
+
+    except git.exc.GitCommandError as e:
+        LOGGER.error(f"Failed to commit changes: {e}")
+        sys.exit(1)
+
 def main():
     """Main entry point for the program."""
     print_ultron_header()
+    gultron_commands = GultronCommands()
     try:
-        gultron_commands = GultronCommands()
         args = gultron_commands.get_args()
-
     except ValueError as e:
         print(f"Error: {e}")
         gultron_commands.print_usage()
@@ -60,6 +78,12 @@ def main():
 
         print("\nGenerated Commit Message:")
         print_commit_message_in_box(commit_message, args)
+
+        # Commit changes if --commit flag is provided
+        if args.commit:
+            LOGGER.info("Committing changes to the repository...")
+            repo = git.Repo(repo_path)
+            commit_changes(repo, commit_message)
 
     except Exception as e:
         LOGGER.critical(f"An error occurred: {str(e)}")

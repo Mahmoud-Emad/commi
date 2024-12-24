@@ -44,8 +44,13 @@ class GultronCommands:
         )
         self.parser.add_argument(
             "--regenerate", 
-            action="store_true", 
+            action="store_true",
             help="Regenerate the commit message based on the repo diff."
+        )
+        self.parser.add_argument(
+            "--commit",
+            action="store_true",
+            help="Commit the generated commit message."
         )
         # self.parser.add_argument(
         #     "--suggest",
@@ -57,7 +62,7 @@ class GultronCommands:
         self.args = self.parser.parse_args()
 
         # Validate mutually exclusive arguments under the 'commit' subcommand
-        if self.args.command == 'commit':
+        if self.args:
             self._validate_arguments()
 
     def _validate_arguments(self):
