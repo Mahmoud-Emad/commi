@@ -79,7 +79,7 @@ def main():
             repo = git.Repo(repo_path)
             commit_changes(repo, commit_message)
 
-        if not args.copy:
+        if not args.copy and not args.commit:
             LOGGER.info("Commit message can be copied to clipboard by using --copy flag.")
 
     except Exception as e:
