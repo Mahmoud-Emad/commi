@@ -82,6 +82,11 @@ def main():
         if not args.copy and not args.commit:
             LOGGER.info("Commit message can be copied to clipboard by using --copy flag.")
 
+        if args.copy:
+            import pyperclip
+            pyperclip.copy(commit_message)
+            LOGGER.info("Commit message copied to clipboard.")
+
     except Exception as e:
         LOGGER.critical(f"An error occurred: {str(e)}")
         sys.exit(1)
