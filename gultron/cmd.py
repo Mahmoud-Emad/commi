@@ -61,17 +61,13 @@ class GultronCommands:
         # Parse the arguments
         self.args = self.parser.parse_args()
 
-        # Validate mutually exclusive arguments under the 'commit' subcommand
-        if self.args:
-            self._validate_arguments()
-
     def _validate_arguments(self):
         """Validate mutually exclusive arguments for commit generation."""
         # Check if at least one of --generate, or --regenerate is provided
-        if not (self.args.generate or self.args.regenerate):
-            LOGGER.critical("You must specify either --generate, or --regenerate.")
-            self.print_usage()
-            exit(1)
+        # if not (self.args.generate or self.args.regenerate):
+        #     LOGGER.critical("You must specify either --generate, or --regenerate.")
+        #     self.print_usage()
+        #     exit(1)
 
         # Ensure that --generate and --regenerate are not used together
         if self.args.generate and self.args.regenerate:
@@ -81,6 +77,10 @@ class GultronCommands:
 
     def get_args(self):
         """Returns the parsed arguments."""
+        # Validate mutually exclusive arguments under the 'commit' subcommand
+        if self.args:
+            self._validate_arguments()
+
         return self.args
 
     def print_usage(self):

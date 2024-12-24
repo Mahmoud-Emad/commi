@@ -22,7 +22,7 @@ print_gultron_description() {
     echo -e "${GREEN}"
     echo "Welcome to Gultron, an AI-powered Git commit message generator tool!"
     echo "This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs."
-    echo "For more details, visit: https://github.com/example/repo"
+    echo "For more details, visit: https://github.com/Mahmoud-Emad/gultron"
     echo ""
     echo -e "${RESET}"
 }

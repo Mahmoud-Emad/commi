@@ -27,7 +27,7 @@ def commit_changes(repo, commit_message):
 
         # Commit with the generated commit message
         repo.git.commit('-m', commit_message)
-        LOGGER.info(f"Committed changes with message: {commit_message}")
+        LOGGER.info(f"Changes committed.")
 
     except git.exc.GitCommandError as e:
         LOGGER.error(f"Failed to commit changes: {e}")
@@ -37,12 +37,7 @@ def main():
     """Main entry point for the program."""
     print_ultron_header()
     gultron_commands = GultronCommands()
-    try:
-        args = gultron_commands.get_args()
-    except ValueError as e:
-        LOGGER.critical(f"Error: {e}")
-        gultron_commands.print_usage()
-        sys.exit(1)
+    args = gultron_commands.get_args()
 
     # Load configuration from .env or default values
     API_KEY = config("API_KEY", default="AIzaSyA6IkFVB8FRwhwy5ZZbVjgLuS-Ye8JMF_I")
@@ -76,7 +71,7 @@ def main():
 
         LOGGER.info("Generating commit message...")
         commit_message = generator.generate_commit_message(diff_text)
-        LOGGER.info(f"Generated Commit Message: {commit_message}")
+        LOGGER.info(f"Generated Commit Message: \n{commit_message}")
 
         # Commit changes if --commit flag is provided
         if args.commit:
