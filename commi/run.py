@@ -5,7 +5,6 @@ from decouple import config
 from commi.cmd import CommiCommands
 from commi.commit_message import CommitMessageGenerator
 from commi.logs import print_ultron_header, LOGGER
-from commi.utils import install_clipboard_tool
 import pyperclip
 
 # Validate if the given path is a valid Git repository
@@ -89,7 +88,6 @@ def handle_copy_process(args, commit_message):
     """Handle the clipboard copy process based on the --copy flag."""
     if args.copy:
         LOGGER.info("Copying commit message to clipboard...")
-        install_clipboard_tool()
         pyperclip.copy(commit_message)
         LOGGER.info("Commit message copied to clipboard.")
 

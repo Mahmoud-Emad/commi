@@ -71,8 +71,23 @@ install_poetry() {
     esac
 }
 
+# Function to check if xclip is installed and install if missing
+install_xclip() {
+    if ! command -v xclip &>/dev/null; then
+        echo -e "${YELLOW}xclip is not installed. Installing xclip...${RESET}"
+        sudo apt-get update
+        sudo apt-get install -y xclip
+        echo -e "${CYAN}xclip installed successfully!${RESET}"
+    else
+        echo -e "${CYAN}xclip is already installed.${RESET}"
+    fi
+}
+
 # Ensure Poetry is installed
 install_poetry
+
+# Ensure xclip is installed
+install_xclip
 
 # Define the paths and filenames
 PYTHON_ENV=$(poetry env info -p)
