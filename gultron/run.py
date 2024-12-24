@@ -41,7 +41,7 @@ def main():
     # Validate if the path is a valid Git repository
     if not validate_repo_path(repo_path):
         LOGGER.error(f"The directory '{repo_path}' is not a valid Git repository.")
-        LOGGER.error("You can either run it from a valid repository path or use the --repo-path option.")
+        LOGGER.error("You can either run it from a valid repository path or use the --repo option.")
         sys.exit(1)
 
     # Initialize generator

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gultron"
-version = "1.1.0"
+version = "1.1.3"
 description = "AI-powered Git commit message generator."
 authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
 readme = "README.md"
@@ -19,7 +19,7 @@ pytest = "^8.3.4"
 grpcio = "1.60.1"
 
 [tool.poetry.scripts]
-gultron = "gultron.main:run"
+gultron = "gultron.run:main"
 
 [tool.poetry.plugins."poetry.post-install"]
 "post-install" = "gultron.post_install:run"
