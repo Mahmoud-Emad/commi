@@ -40,21 +40,21 @@ def setup_logger():
 
 LOGGER = setup_logger()
 
-def print_commit_message_in_box(commit_message, args):
-    """Prints the commit message inside an ASCII box."""
-    lines = commit_message.split("\n")
-    max_line_length = max(len(line) for line in lines)
-    box_width = max_line_length + 4
+# def print_commit_message_in_box(commit_message, args):
+#     """Prints the commit message inside an ASCII box."""
+#     lines = commit_message.split("\n")
+#     max_line_length = max(len(line) for line in lines)
+#     box_width = max_line_length + 4
 
-    print("+" + "-" * (box_width - 2) + "+")
-    for line in lines:
-        print(f"| {line.ljust(max_line_length)} |")
-    print("+" + "-" * (box_width - 2) + "+")
+#     print("+" + "-" * (box_width - 2) + "+")
+#     for line in lines:
+#         print(f"| {line.ljust(max_line_length)} |")
+#     print("+" + "-" * (box_width - 2) + "+")
 
-    if args.copy:
-        try:
-            pyperclip.copy(commit_message)
-            print("\nThe commit message has been copied to your clipboard!")
-        except pyperclip.PyperclipException:
-            LOGGER.warning("Failed to copy commit message to clipboard. Trying to install required tools...")
-            install_clipboard_tool()
+#     if args.copy:
+#         try:
+#             pyperclip.copy(commit_message)
+#             print("\nThe commit message has been copied to your clipboard!")
+#         except pyperclip.PyperclipException:
+#             LOGGER.warning("Failed to copy commit message to clipboard. Trying to install required tools...")
+#             install_clipboard_tool()

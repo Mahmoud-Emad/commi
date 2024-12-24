@@ -1,6 +1,6 @@
 from gultron.cmd import GultronCommands
 from gultron.commit_message import CommitMessageGenerator
-from gultron.logs import print_commit_message_in_box, print_ultron_header, LOGGER
+from gultron.logs import print_ultron_header, LOGGER
 import os
 import sys
 import git
@@ -40,8 +40,9 @@ def main():
     try:
         args = gultron_commands.get_args()
     except ValueError as e:
-        print(f"Error: {e}")
+        LOGGER.critical(f"Error: {e}")
         gultron_commands.print_usage()
+        sys.exit(1)
 
     # Load configuration from .env or default values
     API_KEY = config("API_KEY", default="AIzaSyA6IkFVB8FRwhwy5ZZbVjgLuS-Ye8JMF_I")
@@ -75,9 +76,7 @@ def main():
 
         LOGGER.info("Generating commit message...")
         commit_message = generator.generate_commit_message(diff_text)
-
-        print("\nGenerated Commit Message:")
-        print_commit_message_in_box(commit_message, args)
+        LOGGER.info(f"Generated Commit Message: {commit_message}")
 
         # Commit changes if --commit flag is provided
         if args.commit:
