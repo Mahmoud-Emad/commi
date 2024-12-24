@@ -37,9 +37,9 @@ To install **Commi** manually, follow these steps:
 
    ```bash
    # Inside a repo you can do
-   commi --generate
+   commi --copy
    # or run it from everywhere and pass the repo path as an argument
-   commi --repo "/path/to/your/repo" --generate
+   commi --repo "/path/to/your/repo" --commit
    ```
 
 ### Using pip
@@ -70,7 +70,7 @@ After installation, you can use the command-line interface (CLI) to generate com
 To generate a commit message based on the latest changes in your repository:
 
 ```bash
-commi --repo "/path/to/your/repo" --generate
+commi --repo "/path/to/your/repo"
 ```
 
 ### Use Staged Changes
@@ -114,6 +114,14 @@ To regenerate the commit message, you can use the `--regenerate` flag, which wil
 
 ```bash
 commi --repo "/path/to/your/repo" --regenerate
+```
+
+### Commit the suggested Commit Message
+
+To commit the generated commit message, use the `--commit` flag:
+
+```bash
+commi --repo "/path/to/your/repo" --commit
 ```
 
 ## Configuration
