@@ -35,9 +35,14 @@ def commit_changes(repo, commit_message):
 # Load configuration from environment or command-line arguments
 def load_configuration(args):
     """Load configuration values."""
-    API_KEY = config("API_KEY", default="AIzaSyA6IkFVB8FRwhwy5ZZbVjgLuS-Ye8JMF_I")
+    API_KEY = config("API_KEY")
     if args.api_key:
         API_KEY = args.api_key
+
+    if not API_KEY:
+        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
+        sys.exit(1)
+
     MODEL_NAME = config("MODEL_NAME", default="gemini-1.5-flash")
     return API_KEY, MODEL_NAME
 
