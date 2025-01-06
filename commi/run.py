@@ -73,6 +73,10 @@ def generate_commit_message(generator, args):
 
         LOGGER.info("Generating commit message...")
         commit_message = generator.generate_commit_message(diff_text)
+
+        if args.co_author:
+            commit_message += f"\n\nCo-authored-by: {args.co_author}\n"
+
         LOGGER.info(f"Generated Commit Message: \n{commit_message}")
 
         return commit_message

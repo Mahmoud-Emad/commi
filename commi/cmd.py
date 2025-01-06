@@ -52,11 +52,11 @@ class CommiCommands:
             action="store_true",
             help="Commit the generated commit message."
         )
-        # self.parser.add_argument(
-        #     "--suggest",
-        #     action="store_true",
-        #     help="Suggest a commit message based on the repository changes."
-        # )
+        self.parser.add_argument(
+            "--co-author",
+            type=str,
+            help="Add a co-author to the commit message by specifying their email (e.g., --co-author john.doe@example.com)."
+        )
 
         # Parse the arguments
         self.args = self.parser.parse_args()
