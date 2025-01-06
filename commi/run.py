@@ -75,7 +75,12 @@ def generate_commit_message(generator, args):
         commit_message = generator.generate_commit_message(diff_text)
 
         if args.co_author:
-            commit_message += f"\n\nCo-authored-by: {args.co_author}\n"
+            if not "@" in args.co_author:
+                LOGGER.error("Co-author email is not valid. Please provide a valid email address.")
+                sys.exit(1)
+
+            author_email_first_part = args.co_author.split("@")[0]
+            commit_message += f"\n\nCo-authored-by: {author_email_first_part} <{args.co_author}>\n"
 
         LOGGER.info(f"Generated Commit Message: \n{commit_message}")
 
