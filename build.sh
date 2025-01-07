@@ -89,6 +89,17 @@ install_poetry
 # Ensure xclip is installed
 install_xclip
 
+# Check if Poetry environment exists or create a new one if missing
+ENV_PATH="$HOME/.cache/pypoetry/virtualenvs/poetry_commi_env"
+if [ ! -d "$ENV_PATH" ]; then
+    echo -e "${YELLOW}No Poetry environment found at '$ENV_PATH'. Creating a new one...${RESET}"
+    poetry config virtualenvs.path "$HOME/.cache/pypoetry/virtualenvs"
+    poetry env use python3
+fi
+
+# Activate the Poetry environment and install dependencies
+poetry install
+
 # Define the paths and filenames
 PYTHON_ENV=$(poetry env info -p)
 BIN_DIR="/usr/local/bin"
@@ -115,7 +126,7 @@ done
 
 # Build the binary
 echo -e "${YELLOW}Building the Commi binary...${RESET}"
-poetry run shiv --site-packages "$PYTHON_ENV/lib/python3.12/site-packages" \
+poetry run shiv . \
     --output-file "$OUTPUT_BINARY" \
     --python '/usr/bin/env python3' \
     --entry-point 'commi.run:main'
