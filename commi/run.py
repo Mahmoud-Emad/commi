@@ -35,7 +35,7 @@ def commit_changes(repo, commit_message):
 # Load configuration from environment or command-line arguments
 def load_configuration(args):
     """Load configuration values."""
-    API_KEY = config("API_KEY")
+    API_KEY = config("API_KEY", default=None)
     if args.api_key:
         API_KEY = args.api_key
 
@@ -115,6 +115,9 @@ def main():
 
     # Load configuration settings
     API_KEY, MODEL_NAME = load_configuration(args)
+    if not API_KEY:
+        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
+        sys.exit(1)
 
     # Setup and validate repo path
     repo_path = setup_repo_path(args)
