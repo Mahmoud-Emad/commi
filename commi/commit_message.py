@@ -90,7 +90,6 @@ class CommitMessageGenerator:
 
         - Add a new feature to the project
         - This feature does the following
-        - It improves user experience by...
 
         **Strictly follow this format. Do not generate any message that does not follow this pattern.**
         """
