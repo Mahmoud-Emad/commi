@@ -26,6 +26,8 @@ jobs:
 
   build-and-release:
     needs: create-release
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
