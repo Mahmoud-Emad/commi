@@ -35,16 +35,16 @@ def commit_changes(repo, commit_message):
 # Load configuration from environment or command-line arguments
 def load_configuration(args):
     """Load configuration values."""
-    API_KEY = config("API_KEY", default=None)
+    COMMI_API_KEY = config("COMMI_API_KEY", default=None)
     if args.api_key:
-        API_KEY = args.api_key
+        COMMI_API_KEY = args.api_key
 
-    if not API_KEY:
-        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
+    if not COMMI_API_KEY:
+        LOGGER.error("COMMI_API_KEY is not set. Please set it in the environment or provide it as an argument.")
         sys.exit(1)
 
     MODEL_NAME = config("MODEL_NAME", default="gemini-1.5-flash")
-    return API_KEY, MODEL_NAME
+    return COMMI_API_KEY, MODEL_NAME
 
 # Set up repository path and validate it
 def setup_repo_path(args):
@@ -114,16 +114,16 @@ def main():
     args = commi_commands.get_args()
 
     # Load configuration settings
-    API_KEY, MODEL_NAME = load_configuration(args)
-    if not API_KEY:
-        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
+    COMMI_API_KEY, MODEL_NAME = load_configuration(args)
+    if not COMMI_API_KEY:
+        LOGGER.error("COMMI_API_KEY is not set. Please set it in the environment or provide it as an argument.")
         sys.exit(1)
 
     # Setup and validate repo path
     repo_path = setup_repo_path(args)
 
     # Initialize the CommitMessageGenerator
-    generator = CommitMessageGenerator(repo_path, API_KEY, MODEL_NAME)
+    generator = CommitMessageGenerator(repo_path, COMMI_API_KEY, MODEL_NAME)
 
     try:
         # Generate the commit message
