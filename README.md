@@ -15,6 +15,7 @@ Commi is an AI-powered tool that automatically generates Git commit messages bas
 ### Build from source
 
 To install **Commi** manually, follow these steps:
+
 1. Clone the repository:
 
    ```bash
@@ -98,7 +99,7 @@ commi --repo "/path/to/your/repo" --api-key "your_api_key"
 Alternatively, you can set the API key as an environment variable:
 
 ```bash
-export API_KEY="your_api_key"
+export COMMI_API_KEY="your_api_key"
 commi --repo "/path/to/your/repo"
 ```
 
@@ -134,7 +135,7 @@ commi --repo "/path/to/your/repo" --commit
 
 Commi uses a `.env` file to configure certain settings. You can modify the following settings:
 
-- `API_KEY`: Your Gemini AI API key.
+- `COMMI_API_KEY`: Your Gemini AI API key.
 - `MODEL_NAME`: The AI model to use for commit message generation (e.g., `gemini-1.5-flash`).
 
 ## Contributing
