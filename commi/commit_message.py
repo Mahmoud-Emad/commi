@@ -35,17 +35,13 @@ class CommitMessageGenerator:
     def generate_commit_message(self, diff_text):
         """Generates a commit message based on the provided diff."""
         try:
+            # Build prompt with additional guidance if retrying
             if self.retry_count > 0:
-                # Additional prompt, with guidelines
-                diff_text_ = diff_text + "Please follow the exact format of the commit message as i requested."
-                prompt_with_guidelines = self._build_commit_message_prompt(diff_text_)
-            else:
-                # Initial prompt
-                prompt_with_guidelines = self._build_commit_message_prompt(diff_text)
+                diff_text = diff_text + "\nPlease strictly follow the commit message format guidelines."
 
             # Generate commit message
-            prompt_with_guidelines = self._build_commit_message_prompt(diff_text)
-            response = self.model.generate_content(prompt_with_guidelines)
+            prompt = self._build_commit_message_prompt(diff_text)
+            response = self.model.generate_content(prompt)
             commit_message = response.text.strip()
 
             # Validate if commit message follows the format
@@ -53,12 +49,10 @@ class CommitMessageGenerator:
                 LOGGER.warning("Commit message does not follow the expected format. Regenerating...")
                 self.retry_count += 1
                 
-                # If the retry count exceeds the maximum allowed, raise an error
                 if self.retry_count > self.max_retries:
-                    LOGGER.warning("Maximum retries exceeded. The commit message does not follow the expected format.")
+                    LOGGER.warning("Maximum retries exceeded. Using the last generated message.")
                     return commit_message
                 
-                # Regenerate commit message with additional guidance
                 return self.generate_commit_message(diff_text)
 
             LOGGER.info("Commit message generated successfully.")
@@ -66,61 +60,64 @@ class CommitMessageGenerator:
         except Exception as e:
             self._handle_error("generating commit message", e)
 
+
     def _build_commit_message_prompt(self, diff_text):
         """Builds the prompt used to generate the commit message."""
         prompt = (
-            f"Given the following changes in the code, suggest an appropriate commit message:\n\n"
+            f"Given the following code changes, generate a commit message following these guidelines:\n\n"
+            "1. Start with a short (72 chars or less) summary line in imperative mood\n"
+            "2. Leave one blank line after the summary\n"
+            "3. Use bullet points (with - or *) for listing multiple changes\n"
+            "The changes are:\n"
             f"{diff_text}\n\n"
-            "Commit message:\n"
+            "Reference format:\n"
+            "```\n"
+            "Add CPU arch filter scheduler support\n\n"
+            "- Implement new filtering mechanism for CPU architectures\n"
+            "- Add configuration options for arch-based scheduling\n"
+            "- Update documentation with new filter details\n"
+            "```\n"
+            "Generate a commit message for these changes following the above format."
         )
-        guidelines = (
-            "Please follow the exact format below for the commit message. "
-            "Only return the commit message, no additional text or commentary.\n"
-            "Commit message format:\n"
-        )
-        commit_format = """
-        Commit message format:
-        The message must start with one of these types: [feat, fix, docs, style, refactor, perf, test, chore]
-        The summary of the change should be 50 characters or less.
-        
-        Follow this summary with a detailed description, wrapped at 72 characters. The detailed description should start with '- '.
-        
-        Example format:
-        feat: add new feature
 
-        - Add a new feature to the project
-        - This feature does the following
-
-        **Strictly follow this format. Do not generate any message that does not follow this pattern.**
-        """
-        return f"{prompt}{guidelines}{commit_format}"
+        return prompt
 
     def _is_valid_commit_message(self, message):
         """Validates if the commit message fits the expected format."""
         lines = message.splitlines()
 
-        # Basic checks: we expect at least two lines
-        if len(lines) < 2:
+        # Need at least a summary line
+        if not lines:
             return False
 
-        # Check if the first line starts with a valid commit type (e.g., feat, fix, refactor)
-        valid_types = ['feat', 'fix', 'docs', 'style', 'refactor', 'perf', 'test', 'chore']
-        first_line = lines[0].strip()
-        is_valid_type = False
-
-        for valid_type in valid_types:
-            if first_line.lower().startswith(valid_type):
-                is_valid_type = True
-                break
-
-        if not is_valid_type:
+        # Summary line validation
+        summary = lines[0].strip()
+        if len(summary) > 72:
+            return False
+        
+        # Check for imperative mood (should start with a verb)
+        first_word = summary.split()[0].lower() if summary else ""
+        common_verbs = {'add', 'fix', 'update', 'remove', 'refactor', 'implement', 'improve', 'change', 'merge'}
+        if not any(first_word.startswith(verb) for verb in common_verbs):
             return False
 
-        lines = lines[1:]
+        # Special handling for merge commits
+        if summary.lower().startswith('merge'):
+            return True  # Merge commits have a different format
 
-        # Check if each line starts with '- '
-        for line in lines:
-            if len(line) > 0 and not line.strip().startswith('-'):
+        # If there's a body, it should be separated by a blank line
+        if len(lines) > 1 and lines[1].strip():
+            return False
+
+        # Check line lengths and bullet points in body
+        for line in lines[2:]:
+            line = line.strip()
+            if not line:
+                continue
+            if len(line) > 72:
+                return False
+            # Bullet points should be properly formatted
+            if line.startswith('-') and not line.startswith('- '):
                 return False
 
         return True
