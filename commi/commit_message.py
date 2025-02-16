@@ -1,6 +1,9 @@
 import git
 import google.generativeai as genai
 from commi.logs import LOGGER
+import requests
+import sys
+import os
 
 class CommitMessageGenerator:
     def __init__(self, repo_path, api_key, model_name, max_retries=3):
@@ -60,19 +63,35 @@ class CommitMessageGenerator:
         except Exception as e:
             self._handle_error("generating commit message", e)
 
-
     def _build_commit_message_prompt(self, diff_text):
         """Builds the prompt used to generate the commit message."""
+        commit_types = {
+            'feat': 'New feature',
+            'fix': 'Bug fix',
+            'docs': 'Documentation changes',
+            'style': 'Code style changes (formatting, etc)',
+            'refactor': 'Code refactoring',
+            'perf': 'Performance improvements',
+            'test': 'Adding or updating tests',
+            'build': 'Build system changes',
+            'ci': 'CI/CD changes',
+            'chore': 'General maintenance',
+            'revert': 'Reverting changes'
+        }
+
         prompt = (
             f"Given the following code changes, generate a commit message following these guidelines:\n\n"
-            "1. Start with a short (72 chars or less) summary line in imperative mood\n"
-            "2. Leave one blank line after the summary\n"
-            "3. Use bullet points (with - or *) for listing multiple changes\n"
+            "1. Start with a type prefix from the following list:\n"
+            "\n".join([f"   {type_}: {desc}" for type_, desc in commit_types.items()]) + "\n\n"
+            "2. After the type, add a colon and space, then a short (72 chars or less) summary\n"
+            "3. Leave one blank line after the summary\n"
+            "4. Use bullet points (with - ) for listing multiple changes\n"
+            "5. Each bullet point should explain WHAT and WHY, not HOW\n\n"
             "The changes are:\n"
             f"{diff_text}\n\n"
             "Reference format:\n"
             "```\n"
-            "Add CPU arch filter scheduler support\n\n"
+            "feat: add CPU arch filter scheduler support\n\n"
             "- Implement new filtering mechanism for CPU architectures\n"
             "- Add configuration options for arch-based scheduling\n"
             "- Update documentation with new filter details\n"
@@ -95,10 +114,13 @@ class CommitMessageGenerator:
         if len(summary) > 72:
             return False
         
-        # Check for imperative mood (should start with a verb)
-        first_word = summary.split()[0].lower() if summary else ""
-        common_verbs = {'add', 'fix', 'update', 'remove', 'refactor', 'implement', 'improve', 'change', 'merge'}
-        if not any(first_word.startswith(verb) for verb in common_verbs):
+        # Check for conventional commit format
+        first_word = summary.split(':')[0].lower() if ':' in summary else ""
+        commit_types = {
+            'feat', 'fix', 'docs', 'style', 'refactor', 'perf', 
+            'test', 'build', 'ci', 'chore', 'revert'
+        }
+        if first_word not in commit_types:
             return False
 
         # Special handling for merge commits

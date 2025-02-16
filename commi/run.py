@@ -59,7 +59,7 @@ def load_configuration(args):
     # Handle and validate model name
     MODEL_NAME = validate_model_name(config("MODEL_NAME", default="gemini-1.5-flash"))
     
-    return API_KEY, MODEL_NAME
+    return COMMI_API_KEY, MODEL_NAME
 
 # Set up repository path and validate it
 def setup_repo_path(args):
