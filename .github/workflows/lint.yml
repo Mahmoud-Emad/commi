@@ -39,4 +39,4 @@ jobs:
 
     - name: Verify import order
       run: |
-        ruff check . --select I
+        poetry run ruff check . --select I
