@@ -37,9 +37,9 @@ jobs:
           - os: macos-latest
             platform: macos
             binary_ext: ''
-          - os: windows-latest
-            platform: windows
-            binary_ext: '.exe'
+          # - os: windows-latest
+          #   platform: windows
+          #   binary_ext: '.exe'
     
     runs-on: ${{ matrix.os }}
     
