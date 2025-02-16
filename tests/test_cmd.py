@@ -2,6 +2,7 @@ import pytest
 from commi.cmd import CommiCommands
 from unittest.mock import patch
 
+
 def test_argument_parsing():
     """Test command line argument parsing."""
     test_cases = [
@@ -20,31 +21,33 @@ def test_argument_parsing():
         # Test multiple flags
         (
             ["--repo", "/repo", "--cached", "--copy"],
-            {"repo": "/repo", "cached": True, "copy": True}
+            {"repo": "/repo", "cached": True, "copy": True},
         ),
     ]
 
     for args, expected in test_cases:
-        with patch('sys.argv', ['commi'] + args):
+        with patch("sys.argv", ["commi"] + args):
             cmd = CommiCommands()
             args = cmd.get_args()
             for key, value in expected.items():
                 assert getattr(args, key) == value
 
+
 def test_help_display():
     """Test help text display when no arguments provided."""
-    with patch('sys.argv', ['commi']):
+    with patch("sys.argv", ["commi"]):
         cmd = CommiCommands()
         with pytest.raises(SystemExit) as exc_info:
             cmd.get_args()
         assert exc_info.value.code == 0
 
+
 def test_help_text_content():
     """Test that help text contains important information."""
-    with patch('sys.argv', ['commi']):
+    with patch("sys.argv", ["commi"]):
         cmd = CommiCommands()
         help_text = cmd.parser.format_help()
-        
+
         important_elements = [
             "AI-powered Git commit message generator",
             "Git commit message format",
@@ -55,11 +58,14 @@ def test_help_text_content():
             "--commit",
             "--co-author",
             "summary line",
-            "bullet points"
+            "bullet points",
         ]
-        
+
         for element in important_elements:
-            assert element.lower() in help_text.lower(), f"Help text should contain '{element}'"
+            assert (
+                element.lower() in help_text.lower()
+            ), f"Help text should contain '{element}'"
+
 
 def test_co_author_email_format():
     """Test co-author email format validation."""
@@ -71,10 +77,10 @@ def test_co_author_email_format():
     ]
 
     for args, should_pass in test_cases:
-        with patch('sys.argv', ['commi'] + args):
+        with patch("sys.argv", ["commi"] + args):
             cmd = CommiCommands()
             args = cmd.get_args()
             if should_pass:
-                assert '@' in args.co_author
+                assert "@" in args.co_author
             else:
-                assert args.co_author and '@' not in args.co_author
+                assert args.co_author and "@" not in args.co_author

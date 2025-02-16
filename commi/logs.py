@@ -2,6 +2,7 @@ import pyfiglet
 import logging
 import colorlog
 
+
 def setup_logger():
     """Sets up the logger for colored logging output."""
     handler = colorlog.StreamHandler()
@@ -22,17 +23,21 @@ def setup_logger():
     logger.setLevel(logging.INFO)
     return logger
 
+
 LOGGER = setup_logger()
+
 
 def print_ultron_header():
     """Prints the banner for the application in color."""
     CYAN = "\033[0;36m"
     RESET = "\033[0m"
     # GREEN = "\033[0;32m"
-    
+
     ultron_art = pyfiglet.figlet_format("Commi", font="slant")
     print(f"{CYAN}{ultron_art}{RESET}")
     print("-" * 100)
     print("Welcome to Commi, an AI-powered Git commit message generator tool!")
-    print("This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs.")
+    print(
+        "This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs."
+    )
     print("-" * 100)

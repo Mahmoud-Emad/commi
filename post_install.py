@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 def run():
     try:
         print("Running build.sh script...")

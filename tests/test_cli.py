@@ -1,9 +1,13 @@
 import subprocess
 
+
 def test_help():
-    result = subprocess.run(['commi', '--help'], capture_output=True, text=True)
-    assert 'usage: commi' in result.stdout  # Ensure the usage info is in the output
-    assert 'Welcome to XCommi' not in result.stdout  # Banner should not appear in --help
+    result = subprocess.run(["commi", "--help"], capture_output=True, text=True)
+    assert "usage: commi" in result.stdout  # Ensure the usage info is in the output
+    assert (
+        "Welcome to XCommi" not in result.stdout
+    )  # Banner should not appear in --help
+
 
 # def test_cached_flag():
 #     result = subprocess.run(['commi', '--cached'], capture_output=True, text=True)
