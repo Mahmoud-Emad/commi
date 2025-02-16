@@ -52,9 +52,9 @@ def validate_model_name(model_name):
 def load_configuration(args):
     """Load and validate configuration values."""
     # Handle API key
-    API_KEY = args.api_key or config("API_KEY", default=None)
-    if not API_KEY:
-        raise CommiError("API_KEY is not set. Please set it in the environment or provide it as an argument.")
+    COMMI_API_KEY = args.api_key or config("COMMI_API_KEY", default=None)
+    if not COMMI_API_KEY:
+        raise CommiError("COMMI_API_KEY is not set. Please set it in the environment or provide it as an argument.")
 
     # Handle and validate model name
     MODEL_NAME = validate_model_name(config("MODEL_NAME", default="gemini-1.5-flash"))
@@ -123,11 +123,11 @@ def main():
         args = commi_commands.get_args()
 
         # Load and validate configuration
-        API_KEY, MODEL_NAME = load_configuration(args)
+        COMMI_API_KEY, MODEL_NAME = load_configuration(args)
         repo_path = setup_repo_path(args)
 
         # Initialize generator
-        generator = CommitMessageGenerator(repo_path, API_KEY, MODEL_NAME)
+        generator = CommitMessageGenerator(repo_path, COMMI_API_KEY, MODEL_NAME)
 
         # Generate commit message
         commit_message = generate_commit_message(generator, args)
