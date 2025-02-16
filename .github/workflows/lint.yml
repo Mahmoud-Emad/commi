@@ -27,15 +27,15 @@ jobs:
     
     - name: Run Black
       run: |
-        black --check .
+        poetry run black --check .
     
     - name: Run Ruff
       run: |
-        ruff check .
+        poetry run ruff check . --fix
     
     - name: Run MyPy
       run: |
-        mypy commi/ tests/ --ignore-missing-imports
+        poetry run mypy commi/ tests/ --ignore-missing-imports
 
     - name: Verify import order
       run: |
