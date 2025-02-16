@@ -23,8 +23,11 @@ class CommitMessageGenerator:
 
     def _handle_error(self, context, exception):
         """Handles errors by logging and raising the exception."""
-        LOGGER.error(f"Error during {context}: {str(exception)}")
-        raise exception
+        error_msg = f"Error during {context}: {str(exception)}"
+        LOGGER.error(error_msg)
+        if isinstance(exception, Exception):
+            raise type(exception)(error_msg)
+        raise Exception(error_msg)
 
     def get_diff(self, cached=False):
         """Fetches the git diff based on staged changes or the latest commit."""
@@ -32,7 +35,7 @@ class CommitMessageGenerator:
             diff = self.repo.git.diff('--cached' if cached else 'HEAD')
             LOGGER.info("Successfully fetched git diff.")
             return diff
-        except git.exc.GitCommandError as e:
+        except Exception as e:
             self._handle_error("fetching git diff", e)
 
     def generate_commit_message(self, diff_text):
@@ -45,7 +48,7 @@ class CommitMessageGenerator:
             # Generate commit message
             prompt = self._build_commit_message_prompt(diff_text)
             response = self.model.generate_content(prompt)
-            commit_message = response.text.strip()
+            commit_message = str(response.text.strip())
 
             # Validate if commit message follows the format
             if not self._is_valid_commit_message(commit_message):
@@ -76,7 +79,8 @@ class CommitMessageGenerator:
             'build': 'Build system changes',
             'ci': 'CI/CD changes',
             'chore': 'General maintenance',
-            'revert': 'Reverting changes'
+            'revert': 'Reverting changes',
+            'merge': 'Merge commits'
         }
 
         prompt = (
@@ -103,43 +107,46 @@ class CommitMessageGenerator:
 
     def _is_valid_commit_message(self, message):
         """Validates if the commit message fits the expected format."""
-        lines = message.splitlines()
+        try:
+            lines = str(message).splitlines()
 
-        # Need at least a summary line
-        if not lines:
-            return False
-
-        # Summary line validation
-        summary = lines[0].strip()
-        if len(summary) > 72:
-            return False
-        
-        # Check for conventional commit format
-        first_word = summary.split(':')[0].lower() if ':' in summary else ""
-        commit_types = {
-            'feat', 'fix', 'docs', 'style', 'refactor', 'perf', 
-            'test', 'build', 'ci', 'chore', 'revert'
-        }
-        if first_word not in commit_types:
-            return False
-
-        # Special handling for merge commits
-        if summary.lower().startswith('merge'):
-            return True  # Merge commits have a different format
-
-        # If there's a body, it should be separated by a blank line
-        if len(lines) > 1 and lines[1].strip():
-            return False
-
-        # Check line lengths and bullet points in body
-        for line in lines[2:]:
-            line = line.strip()
-            if not line:
-                continue
-            if len(line) > 72:
-                return False
-            # Bullet points should be properly formatted
-            if line.startswith('-') and not line.startswith('- '):
+            # Need at least a summary line
+            if not lines:
                 return False
 
-        return True
+            # Summary line validation
+            summary = lines[0].strip()
+            if len(summary) > 72:
+                return False
+            
+            # Check for conventional commit format
+            first_word = summary.split(':')[0].lower() if ':' in summary else ""
+            commit_types = {
+                'feat', 'fix', 'docs', 'style', 'refactor', 'perf', 
+                'test', 'build', 'ci', 'chore', 'revert', 'merge'
+            }
+            if first_word not in commit_types:
+                # Special case for merge commits
+                if summary.lower().startswith('merge'):
+                    return True
+                return False
+
+            # If there's a body, it should be separated by a blank line
+            if len(lines) > 1 and lines[1].strip():
+                return False
+
+            # Check line lengths and bullet points in body
+            for line in lines[2:]:
+                line = line.strip()
+                if not line:
+                    continue
+                if len(line) > 72:
+                    return False
+                # Bullet points should be properly formatted
+                if line.startswith('-') and not line.startswith('- '):
+                    return False
+
+            return True
+        except Exception as e:
+            LOGGER.error(f"Error validating commit message: {str(e)}")
+            return False
