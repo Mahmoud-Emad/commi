@@ -8,6 +8,10 @@ from commi.logs import print_ultron_header, LOGGER
 import pyperclip
 
 # Validate if the given path is a valid Git repository
+class CommiError(Exception):
+    """Base exception class for Commi errors."""
+    pass
+
 def validate_repo_path(path):
     """Validates if the given path is a valid Git repository."""
     try:
@@ -16,34 +20,45 @@ def validate_repo_path(path):
     except git.exc.InvalidGitRepositoryError:
         return False
 
-# Commit changes to the repository
+def has_changes(repo, cached=False):
+    """Check if there are changes to commit."""
+    if cached:
+        # Check for staged changes
+        diff = repo.git.diff('--cached')
+        return bool(diff.strip())
+    else:
+        # Check for any changes (staged or unstaged)
+        return repo.is_dirty(untracked_files=True)
+
 def commit_changes(repo, commit_message):
     """Commits the generated commit message to the repository."""
     try:
-        if not repo.is_dirty(untracked_files=True):
-            LOGGER.warning("No changes to commit.")
-            return
+        if not has_changes(repo, cached=True):
+            raise CommiError("No staged changes to commit. Use 'git add' to stage changes.")
 
-        # Stage all changes and commit
-        repo.git.add(A=True)
         repo.git.commit('-m', commit_message)
-        LOGGER.info(f"Changes committed successfully.")
+        LOGGER.info("Changes committed successfully.")
     except git.exc.GitCommandError as e:
-        LOGGER.error(f"Failed to commit changes: {e}")
-        sys.exit(1)
+        raise CommiError(f"Failed to commit changes: {e}")
 
-# Load configuration from environment or command-line arguments
+def validate_model_name(model_name):
+    """Validate the model name."""
+    valid_models = {'gemini-1.0-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'}
+    if model_name not in valid_models:
+        LOGGER.warning(f"Unrecognized model: {model_name}. Using default model gemini-1.5-flash")
+        return "gemini-1.5-flash"
+    return model_name
+
 def load_configuration(args):
-    """Load configuration values."""
-    API_KEY = config("API_KEY", default=None)
-    if args.api_key:
-        API_KEY = args.api_key
-
+    """Load and validate configuration values."""
+    # Handle API key
+    API_KEY = args.api_key or config("API_KEY", default=None)
     if not API_KEY:
-        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
-        sys.exit(1)
+        raise CommiError("API_KEY is not set. Please set it in the environment or provide it as an argument.")
 
-    MODEL_NAME = config("MODEL_NAME", default="gemini-1.5-flash")
+    # Handle and validate model name
+    MODEL_NAME = validate_model_name(config("MODEL_NAME", default="gemini-1.5-flash"))
+    
     return API_KEY, MODEL_NAME
 
 # Set up repository path and validate it
@@ -63,31 +78,24 @@ def setup_repo_path(args):
 # Generate and process the commit message
 def generate_commit_message(generator, args):
     """Generate commit message based on the git diff."""
-    try:
-        LOGGER.info("Fetching git diff...")
-        diff_text = generator.get_diff(cached=args.cached)
+    LOGGER.info("Fetching git diff...")
+    diff_text = generator.get_diff(cached=args.cached)
 
-        if not diff_text:
-            LOGGER.error("Cannot generate commit message. No changes found in the git diff.")
-            sys.exit(1)
+    if not diff_text:
+        raise CommiError("No changes found in the git diff. Make sure you have changes to commit.")
 
-        LOGGER.info("Generating commit message...")
-        commit_message = generator.generate_commit_message(diff_text)
+    LOGGER.info("Generating commit message...")
+    commit_message = generator.generate_commit_message(diff_text)
 
-        if args.co_author:
-            if not "@" in args.co_author:
-                LOGGER.error("Co-author email is not valid. Please provide a valid email address.")
-                sys.exit(1)
+    if args.co_author:
+        if '@' not in args.co_author:
+            raise CommiError("Invalid co-author email. Please provide a valid email address.")
 
-            author_email_first_part = args.co_author.split("@")[0]
-            commit_message += f"\n\nCo-authored-by: {author_email_first_part} <{args.co_author}>\n"
+        author_name = args.co_author.split('@')[0]
+        commit_message += f"\n\nCo-authored-by: {author_name} <{args.co_author}>"
 
-        LOGGER.info(f"Generated Commit Message: \n{commit_message}")
-
-        return commit_message
-    except Exception as e:
-        LOGGER.critical(f"An error occurred while generating commit message: {str(e)}")
-        sys.exit(1)
+    LOGGER.info(f"Generated Commit Message:\n{commit_message}")
+    return commit_message
 
 # Handle commit process based on flags
 def handle_commit_process(args, repo_path, commit_message):
@@ -110,37 +118,40 @@ def main():
     """Main entry point for the program."""
     print_ultron_header()
     
-    commi_commands = CommiCommands()
-    args = commi_commands.get_args()
-
-    # Load configuration settings
-    API_KEY, MODEL_NAME = load_configuration(args)
-    if not API_KEY:
-        LOGGER.error("API_KEY is not set. Please set it in the environment or provide it as an argument.")
-        sys.exit(1)
-
-    # Setup and validate repo path
-    repo_path = setup_repo_path(args)
-
-    # Initialize the CommitMessageGenerator
-    generator = CommitMessageGenerator(repo_path, API_KEY, MODEL_NAME)
-
     try:
-        # Generate the commit message
+        commi_commands = CommiCommands()
+        args = commi_commands.get_args()
+
+        # Load and validate configuration
+        API_KEY, MODEL_NAME = load_configuration(args)
+        repo_path = setup_repo_path(args)
+
+        # Initialize generator
+        generator = CommitMessageGenerator(repo_path, API_KEY, MODEL_NAME)
+
+        # Generate commit message
         commit_message = generate_commit_message(generator, args)
 
-        # Handle commit operation if --commit flag is provided
-        handle_commit_process(args, repo_path, commit_message)
+        # Handle commit operation
+        if args.commit:
+            repo = git.Repo(repo_path)
+            if not has_changes(repo, args.cached):
+                LOGGER.warning("No changes to commit. Stage changes with 'git add' first.")
+            else:
+                commit_changes(repo, commit_message)
 
-        # Handle copy operation if --copy flag is provided
-        handle_copy_process(args, commit_message)
+        # Handle copy operation
+        if args.copy:
+            pyperclip.copy(commit_message)
+            LOGGER.info("Commit message copied to clipboard.")
+        elif not args.commit:
+            LOGGER.info("Use --copy to copy the message or --commit to commit changes.")
 
-        # Provide feedback if neither --copy nor --commit is provided
-        if not args.copy and not args.commit:
-            LOGGER.info("Commit message can be copied to clipboard by using --copy flag.")
-
+    except CommiError as e:
+        LOGGER.error(str(e))
+        sys.exit(1)
     except Exception as e:
-        LOGGER.critical(f"An error occurred: {str(e)}")
+        LOGGER.critical(f"An unexpected error occurred: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
