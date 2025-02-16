@@ -17,6 +17,9 @@ pyfiglet = "^1.0.2"
 pyperclip = "^1.9.0"
 pytest = "^8.3.4"
 grpcio = "1.60.1"
+ruff = "^0.9.6"
+black = "^25.1.0"
+mypy = "^1.15.0"
 
 [tool.poetry.scripts]
 commi = "commi.run:main"
