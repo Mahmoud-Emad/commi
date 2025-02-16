@@ -1,9 +1,6 @@
 import git
 import google.generativeai as genai
 from commi.logs import LOGGER
-import requests
-import sys
-import os
 
 class CommitMessageGenerator:
     def __init__(self, repo_path, api_key, model_name, max_retries=3):
@@ -84,7 +81,7 @@ class CommitMessageGenerator:
         }
 
         prompt = (
-            f"Given the following code changes, generate a commit message following these guidelines:\n\n"
+            "Given the following code changes, generate a commit message following these guidelines:\n\n"
             "1. Start with a type prefix from the following list:\n"
             "\n".join([f"   {type_}: {desc}" for type_, desc in commit_types.items()]) + "\n\n"
             "2. After the type, add a colon and space, then a short (72 chars or less) summary\n"

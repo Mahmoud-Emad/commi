@@ -1,6 +1,5 @@
 import argparse
 import sys
-from commi.logs import LOGGER
 
 class CommiCommands:
     def __init__(self):

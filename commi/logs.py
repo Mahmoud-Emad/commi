@@ -33,6 +33,6 @@ def print_ultron_header():
     ultron_art = pyfiglet.figlet_format("Commi", font="slant")
     print(f"{CYAN}{ultron_art}{RESET}")
     print("-" * 100)
-    print(f"Welcome to Commi, an AI-powered Git commit message generator tool!")
+    print("Welcome to Commi, an AI-powered Git commit message generator tool!")
     print("This tool uses Google's Gemini AI to suggest meaningful commit messages based on your git diffs.")
     print("-" * 100)

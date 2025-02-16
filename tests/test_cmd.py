@@ -1,6 +1,5 @@
 import pytest
 from commi.cmd import CommiCommands
-import sys
 from unittest.mock import patch
 
 def test_argument_parsing():

@@ -3,7 +3,7 @@ from commi.run import (
     validate_repo_path, has_changes, commit_changes, 
     validate_model_name, load_configuration, CommiError
 )
-from unittest.mock import Mock, patch, PropertyMock, MagicMock
+from unittest.mock import Mock, patch, MagicMock
 import git
 
 def test_validate_repo_path():

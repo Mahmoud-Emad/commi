@@ -1,6 +1,6 @@
 import pytest
 from commi.commit_message import CommitMessageGenerator
-from unittest.mock import Mock, patch, PropertyMock, MagicMock
+from unittest.mock import Mock, patch, MagicMock
 
 @pytest.fixture
 def mock_repo():
