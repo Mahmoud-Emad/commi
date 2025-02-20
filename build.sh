@@ -151,8 +151,6 @@ poetry run shiv . \
     --output-file "$OUTPUT_BINARY" \
     --python '/usr/bin/env python3' \
     --entry-point 'commi.run:main' \
-    --no-deps \
-    --compressed
 
 # Check if the binary was successfully created
 if [ ! -f "$OUTPUT_BINARY" ]; then
