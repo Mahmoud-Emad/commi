@@ -27,6 +27,49 @@ print_commi_description() {
     echo -e "${RESET}"
 }
 
+# Function to ensure grpcio is properly installed
+install_grpcio() {
+    echo -e "${YELLOW}Ensuring grpcio is correctly installed...${RESET}"
+
+    # Set macOS build flags for gRPC
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+        export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+    fi
+
+    # Force reinstall grpcio
+    poetry run pip uninstall -y grpcio grpcio-tools
+    poetry run pip install --no-cache-dir --force-reinstall grpcio grpcio-tools
+
+    # Verify installation
+    if ! poetry run python -c "import grpc" &>/dev/null; then
+        echo -e "${RED}Error: grpcio installation failed.${RESET}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}grpcio installed successfully.${RESET}"
+}
+
+# Function to check Python version and prompt upgrade if needed
+check_python_version() {
+    REQUIRED_PYTHON_VERSION=3.10
+    INSTALLED_PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+    
+    if [[ $(echo -e "$INSTALLED_PYTHON_VERSION\n$REQUIRED_PYTHON_VERSION" | sort -V | head -n1) != "$REQUIRED_PYTHON_VERSION" ]]; then
+        echo -e "${RED}Warning: Your Python version ($INSTALLED_PYTHON_VERSION) is lower than the recommended version ($REQUIRED_PYTHON_VERSION).${RESET}"
+        echo -e "${YELLOW}Please upgrade Python for better compatibility.${RESET}"
+        echo -e "${CYAN}On macOS, run:${RESET}"
+        echo -e "  brew update && brew upgrade python"
+        echo -e "${CYAN}On Linux (Debian-based), run:${RESET}"
+        echo -e "  sudo apt update && sudo apt install python3"
+        echo ""
+        if ! ask_confirmation "Do you want to continue anyway?"; then
+            echo -e "${RED}Installation aborted.${RESET}"
+            exit 1
+        fi
+    fi
+}
+
 # Function to check if a package is installed in the current Poetry environment
 check_package_installed() {
     package_name=$1
