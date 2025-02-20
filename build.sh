@@ -144,6 +144,12 @@ install_xclip() {
 # Ensure Poetry is installed
 install_poetry
 
+# Ensure grpcio is properly installed
+install_grpcio
+
+# Check Python version
+check_python_version
+
 # Ensure xclip is installed
 install_xclip
 
@@ -185,15 +191,12 @@ done
 # Build the binary
 echo -e "${YELLOW}Building the Commi binary...${RESET}"
 # On macOS, we need to ensure grpc is built from source
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
-    export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
-fi
 
 poetry run shiv . \
     --output-file "$OUTPUT_BINARY" \
     --python '/usr/bin/env python3' \
     --entry-point 'commi.run:main' \
+    --compressed
 
 # Check if the binary was successfully created
 if [ ! -f "$OUTPUT_BINARY" ]; then
