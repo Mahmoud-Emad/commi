@@ -117,10 +117,10 @@ This requires the installation of `xclip` (on Linux systems). If it's not instal
 
 ### Regenerate a Commit Message
 
-To regenerate the commit message, you can use the `--regenerate` flag, which will generate a new commit message based on the latest changes.
+To regenerate the commit message, you can simply run the command one more time:
 
 ```bash
-commi --repo "/path/to/your/repo" --regenerate
+commi --repo "/path/to/your/repo"
 ```
 
 ### Commit the suggested Commit Message
