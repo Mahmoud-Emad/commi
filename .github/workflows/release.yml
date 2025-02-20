@@ -67,7 +67,13 @@ jobs:
         
     - name: Build binary
       run: |
-        poetry run shiv -c commi -o dist/commi${{ matrix.binary_ext }} .
+        poetry run shiv . \
+          --console-script commi \
+          --output-file 'dist/commi${{ matrix.binary_ext }}' \
+          --python '/usr/bin/env python3' \
+          --entry-point 'commi.run:main' \
+          --no-deps \
+          --compressed
         
     - name: Upload binary to release
       uses: actions/upload-release-asset@v1
