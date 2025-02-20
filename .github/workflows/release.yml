@@ -72,6 +72,7 @@ jobs:
           --output-file 'dist/commi${{ matrix.binary_ext }}' \
           --python '/usr/bin/env python3' \
           --entry-point 'commi.run:main' \
+          --compressed
         
     - name: Upload binary to release
       uses: actions/upload-release-asset@v1
