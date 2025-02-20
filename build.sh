@@ -65,10 +65,6 @@ check_python_version() {
         echo -e "${CYAN}On Linux (Debian-based), run:${RESET}"
         echo -e "  sudo apt update && sudo apt install python3"
         echo ""
-        if ! ask_confirmation "Do you want to continue anyway?"; then
-            echo -e "${RED}Installation aborted.${RESET}"
-            exit 1
-        fi
     fi
 }
 
