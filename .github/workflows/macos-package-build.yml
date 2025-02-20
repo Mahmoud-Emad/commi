@@ -32,12 +32,10 @@ jobs:
 
       - name: Verify executable
         run: |
+          export TERM=xterm  # Set a default terminal
           if ! command -v commi &>/dev/null; then
             echo "Error: commi executable was not found!"
             exit 1
           fi
           echo "Commi executable found, running a test..."
           commi --help || { echo "Error: Executable failed to run!"; exit 1; }
-
-      - name: Print success message
-        run: echo "✅ Build and execution successful!"
