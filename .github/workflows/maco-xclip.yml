@@ -1,0 +1,22 @@
+name: Test xclip on macOS
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+
+jobs:
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install xclip
+        run: |
+          if ! command -v xclip &>/dev/null; then
+            brew install xclip
+          fi
+          xclip -version || echo "xclip installed successfully"

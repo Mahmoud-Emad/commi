@@ -75,8 +75,23 @@ install_poetry() {
 install_xclip() {
     if ! command -v xclip &>/dev/null; then
         echo -e "${YELLOW}xclip is not installed. Installing xclip...${RESET}"
-        sudo apt-get update
-        sudo apt-get install -y xclip
+        
+        # Check the platform and install xclip
+        os=$(uname -s)
+        case "$os" in
+            Linux)
+                sudo apt-get update
+                sudo apt-get install -y xclip
+                ;;
+            Darwin)
+                brew install xclip
+                ;;
+            *)
+                echo -e "${RED}Unsupported OS: $os${RESET}"
+                exit 1
+                ;;
+        esac
+
         echo -e "${CYAN}xclip installed successfully!${RESET}"
     else
         echo -e "${CYAN}xclip is already installed.${RESET}"
@@ -126,10 +141,18 @@ done
 
 # Build the binary
 echo -e "${YELLOW}Building the Commi binary...${RESET}"
+# On macOS, we need to ensure grpc is built from source
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+    export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+fi
+
 poetry run shiv . \
     --output-file "$OUTPUT_BINARY" \
     --python '/usr/bin/env python3' \
-    --entry-point 'commi.run:main'
+    --entry-point 'commi.run:main' \
+    --no-deps \
+    --compressed
 
 # Check if the binary was successfully created
 if [ ! -f "$OUTPUT_BINARY" ]; then
@@ -181,4 +204,4 @@ echo -e "${CYAN}2. Optionally provide an API key:${RESET}"
 echo -e "   $ commi --repo '${HOME}/example/repo' --api-key 'your_api_key'"
 echo -e "${CYAN}3. Or set the API key as an environment variable:${RESET}"
 echo -e "   $ export COMMI_API_KEY='your_api_key' && commi --repo '${HOME}/example/repo'"
-echo -e "${CYAN}If no API key is provided, a default value will be used.${RESET}"
+echo -e "${CYAN}If you don't have an API key, you can use one of the pre-built binaries: https://github.com/Mahmoud-Emad/commi/releases.${RESET}"
