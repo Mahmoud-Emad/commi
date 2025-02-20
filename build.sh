@@ -10,6 +10,8 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
+export TERM=xterm-color
+
 # Function to print Commi ASCII art with optional coloring
 print_commi_ascii() {
     echo -e "${CYAN}"
