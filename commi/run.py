@@ -145,19 +145,25 @@ def main():
     try:
         commi_commands = CommiCommands()
         args = commi_commands.get_args()
-        
+
         # Handle update command
         if args.update:
             if commi_commands.is_update_available():
-                LOGGER.info(f"Update available: {commi_commands.installed_version} -> {commi_commands.latest_version}")
+                LOGGER.info(
+                    f"Update available: {commi_commands.installed_version} -> {commi_commands.latest_version}"
+                )
                 commi_commands.update_binary()
             else:
-                LOGGER.info(f"You are already using the latest version: {commi_commands.installed_version}")
+                LOGGER.info(
+                    f"You are already using the latest version: {commi_commands.installed_version}"
+                )
             return
-            
+
         # Check for updates and notify user
         if commi_commands.is_update_available():
-            LOGGER.info(f"A new version of Commi is available: {commi_commands.latest_version}")
+            LOGGER.info(
+                f"A new version of Commi is available: {commi_commands.latest_version}"
+            )
             LOGGER.info("Run 'commi --update' to update to the latest version.")
 
         # Load and validate configuration
