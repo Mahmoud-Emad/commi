@@ -20,6 +20,11 @@ grpcio = "^1.62.0"
 ruff = "^0.9.6"
 black = "^25.1.0"
 mypy = "^1.15.0"
+toml = "^0.10.2"
+packaging = "^24.2"
+types-toml = "^0.10.8.20240310"
+requests = "^2.32.3"
+types-requests = "^2.32.0.20250328"
 
 [tool.poetry.scripts]
 commi = "commi.run:main"
