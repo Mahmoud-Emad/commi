@@ -20,6 +20,8 @@ grpcio = "^1.62.0"
 ruff = "^0.9.6"
 black = "^25.1.0"
 mypy = "^1.15.0"
+toml = "^0.10.2"
+packaging = "^24.2"
 
 [tool.poetry.scripts]
 commi = "commi.run:main"
