@@ -1,7 +1,6 @@
 import pytest
 import os
 import json
-import sys
 from unittest.mock import patch, Mock, mock_open, MagicMock
 from datetime import datetime, timedelta
 from commi.cmd import CommiCommands
