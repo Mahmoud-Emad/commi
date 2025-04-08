@@ -63,6 +63,7 @@ def test_get_installed_version():
         version = cmd.get_installed_version()
         assert version == "2.2.5"
 
+
 def test_is_update_available():
     """Test checking if an update is available."""
     # Test when update is available
