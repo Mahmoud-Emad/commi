@@ -1,10 +1,9 @@
 import os
 import requests
-import json
 import argparse
 import sys
 import subprocess
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 class CommiCommands:
@@ -28,29 +27,40 @@ class CommiCommands:
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
         self.parser.add_argument(
-            "-v", "--version", action="version", version=self.installed_version,
-            help="Show version number and exit"
+            "-v",
+            "--version",
+            action="version",
+            version=self.installed_version,
+            help="Show version number and exit",
         )
         self.parser.add_argument(
-            "-r", "--repo", help="Path to Git repository (defaults to current directory)"
+            "-r",
+            "--repo",
+            help="Path to Git repository (defaults to current directory)",
         )
         self.parser.add_argument(
             "-k", "--api-key", help="Gemini AI API key (or set GEMINI_API_KEY env var)"
         )
         self.parser.add_argument(
-            "-c","--cached", action="store_true", help="Use staged changes only"
+            "-c", "--cached", action="store_true", help="Use staged changes only"
         )
         self.parser.add_argument(
-            "-t","--copy", action="store_true", help="Copy message to clipboard"
+            "-t", "`--copy", action="store_true", help="Copy message to clipboard"
         )
         self.parser.add_argument(
-            "-m", "--commit", action="store_true", help="Auto commit with generated message"
+            "-m",
+            "--commit",
+            action="store_true",
+            help="Auto commit with generated message",
         )
         self.parser.add_argument(
             "-a", "--co-author", metavar="EMAIL", help="Add a co-author to the commit"
         )
         self.parser.add_argument(
-            "-u", "--update", action="store_true", help="Update Commi to the latest version"
+            "-u",
+            "--update",
+            action="store_true",
+            help="Update Commi to the latest version",
         )
 
         self.args = self.parser.parse_args()
@@ -65,6 +75,7 @@ class CommiCommands:
         """Get the installed version from pyproject.toml"""
         try:
             import toml
+
             with open("pyproject.toml", "r") as f:
                 pyproject = toml.load(f)
                 return pyproject["tool"]["poetry"]["version"]
