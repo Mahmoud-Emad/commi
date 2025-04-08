@@ -28,28 +28,29 @@ class CommiCommands:
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
         self.parser.add_argument(
-            "--version", action="version", version=self.installed_version
+            "-v", "--version", action="version", version=self.installed_version,
+            help="Show version number and exit"
         )
         self.parser.add_argument(
-            "--repo", help="Path to Git repository (defaults to current directory)"
+            "-r", "--repo", help="Path to Git repository (defaults to current directory)"
         )
         self.parser.add_argument(
-            "--api-key", help="Gemini AI API key (or set GEMINI_API_KEY env var)"
+            "-k", "--api-key", help="Gemini AI API key (or set GEMINI_API_KEY env var)"
         )
         self.parser.add_argument(
-            "--cached", action="store_true", help="Use staged changes only"
+            "-c","--cached", action="store_true", help="Use staged changes only"
         )
         self.parser.add_argument(
-            "--copy", action="store_true", help="Copy message to clipboard"
+            "-t","--copy", action="store_true", help="Copy message to clipboard"
         )
         self.parser.add_argument(
-            "--commit", action="store_true", help="Auto commit with generated message"
+            "-m", "--commit", action="store_true", help="Auto commit with generated message"
         )
         self.parser.add_argument(
-            "--co-author", metavar="EMAIL", help="Add a co-author to the commit"
+            "-a", "--co-author", metavar="EMAIL", help="Add a co-author to the commit"
         )
         self.parser.add_argument(
-            "--update", action="store_true", help="Update Commi to the latest version"
+            "-u", "--update", action="store_true", help="Update Commi to the latest version"
         )
 
         self.args = self.parser.parse_args()
@@ -64,31 +65,14 @@ class CommiCommands:
         """Get the installed version from pyproject.toml"""
         try:
             import toml
-
-            pyproject_path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                "pyproject.toml",
-            )
-            with open(pyproject_path, "r") as f:
+            with open("pyproject.toml", "r") as f:
                 pyproject = toml.load(f)
                 return pyproject["tool"]["poetry"]["version"]
         except Exception as e:
-            print(f"Warning: Failed to get installed version: {e}")
-            return "0.0.0"  # Default if fetch fails
+            raise Exception(f"Failed to get installed version: {e}")
 
     def get_latest_version(self):
         """Get the latest version from GitHub releases"""
-        # Check if version is cached and not expired
-        if os.path.exists(self.VERSION_CACHE_FILE):
-            with open(self.VERSION_CACHE_FILE, "r") as f:
-                try:
-                    cache = json.load(f)
-                    cached_time = datetime.fromisoformat(cache.get("fetched_at"))
-                    if datetime.now() - cached_time < self.VERSION_CACHE_EXPIRY:
-                        return cache.get("version")
-                except Exception:
-                    pass  # In case of JSON error, fall back to fetching again
-
         # Fetch from GitHub Releases API
         try:
             resp = requests.get(
@@ -97,20 +81,9 @@ class CommiCommands:
             )
             if resp.status_code == 200:
                 latest_version = resp.json()["tag_name"]
-                # Cache it
-                with open(self.VERSION_CACHE_FILE, "w") as f:
-                    json.dump(
-                        {
-                            "version": latest_version,
-                            "fetched_at": datetime.now().isoformat(),
-                        },
-                        f,
-                    )
                 return latest_version
         except Exception as e:
-            print("Warning: Failed to fetch latest version:", e)
-
-        return "0.0.0"  # Default if fetch fails
+            raise Exception(f"Failed to fetch latest version: {e}")
 
     def is_update_available(self):
         """Check if an update is available"""
