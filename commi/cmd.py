@@ -27,25 +27,31 @@ class CommiCommands:
             formatter_class=argparse.RawDescriptionHelpFormatter,
         )
         self.parser.add_argument(
-            "-v",
             "--version",
+            "-v",
             action="version",
             version=self.installed_version,
             help="Show version number and exit",
         )
         self.parser.add_argument(
-            "-r",
             "--repo",
+            "-r",
             help="Path to Git repository (defaults to current directory)",
         )
         self.parser.add_argument(
-            "-k", "--api-key", help="Gemini AI API key (or set GEMINI_API_KEY env var)"
+            "--api-key",
+            "-k",
+            help="Gemini AI API key (or set GEMINI_API_KEY env var)"
         )
         self.parser.add_argument(
-            "-c", "--cached", action="store_true", help="Use staged changes only"
+            "--cached",
+            "-c",
+            action="store_true", help="Use staged changes only"
         )
         self.parser.add_argument(
-            "-t", "`--copy", action="store_true", help="Copy message to clipboard"
+            "-t",
+            "--copy",
+            action="store_true", help="Copy message to clipboard"
         )
         self.parser.add_argument(
             "-m",
@@ -54,11 +60,14 @@ class CommiCommands:
             help="Auto commit with generated message",
         )
         self.parser.add_argument(
-            "-a", "--co-author", metavar="EMAIL", help="Add a co-author to the commit"
+            "--co-author",
+            "-a",
+            metavar="EMAIL",
+            help="Add a co-author to the commit"
         )
         self.parser.add_argument(
-            "-u",
             "--update",
+            "-u",
             action="store_true",
             help="Update Commi to the latest version",
         )

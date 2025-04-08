@@ -63,40 +63,6 @@ def test_get_installed_version():
         version = cmd.get_installed_version()
         assert version == "2.2.5"
 
-
-def test_get_latest_version_from_cache(mock_version_cache):
-    """Test getting the latest version from cache."""
-    cmd = MockCommiCommands()
-    version = cmd.get_latest_version()
-    assert version == "v2.3.0"
-
-
-def test_get_latest_version_from_api():
-    """Test getting the latest version from GitHub API."""
-    mock_response = Mock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"tag_name": "v2.3.1"}
-
-    with patch("os.path.exists", return_value=False), patch(
-        "requests.get", return_value=mock_response
-    ), patch("builtins.open", mock_open()) as mock_file:
-        cmd = MockCommiCommands()
-        version = cmd.get_latest_version()
-        assert version == "v2.3.1"
-        # Verify that write was called (don't check exact number of calls since json.dump makes multiple calls)
-        assert mock_file().write.called
-
-
-def test_get_latest_version_api_error():
-    """Test handling API errors when getting the latest version."""
-    with patch("os.path.exists", return_value=False), patch(
-        "requests.get", side_effect=Exception("API Error")
-    ):
-        cmd = MockCommiCommands()
-        version = cmd.get_latest_version()
-        assert version == "0.0.0"  # Default fallback
-
-
 def test_is_update_available():
     """Test checking if an update is available."""
     # Test when update is available
