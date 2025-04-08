@@ -10,6 +10,8 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
+export TERM=xterm-color
+
 # Function to print Commi ASCII art with optional coloring
 print_commi_ascii() {
     echo -e "${CYAN}"
@@ -63,10 +65,6 @@ check_python_version() {
         echo -e "${CYAN}On Linux (Debian-based), run:${RESET}"
         echo -e "  sudo apt update && sudo apt install python3"
         echo ""
-        if ! ask_confirmation "Do you want to continue anyway?"; then
-            echo -e "${RED}Installation aborted.${RESET}"
-            exit 1
-        fi
     fi
 }
 

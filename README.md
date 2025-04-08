@@ -14,6 +14,9 @@ Commi is an AI-powered tool that automatically generates Git commit messages bas
 
 ### Build from source
 
+**Requirements:**
+- Python 3.12 or higher
+
 To install **Commi** manually, follow these steps:
 
 1. Clone the repository:
@@ -46,6 +49,9 @@ To install **Commi** manually, follow these steps:
    ```
 
 ### Using pip
+
+**Requirements:**
+- Python 3.12 or higher
 
 You can install **Commi** using pip:
 
