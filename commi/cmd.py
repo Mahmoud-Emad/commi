@@ -72,15 +72,35 @@ class CommiCommands:
         return self.args
 
     def get_installed_version(self):
-        """Get the installed version from pyproject.toml"""
+        """Get the installed version from pyproject.toml or package metadata"""
         try:
             import toml
+            import os
+            import importlib.metadata
 
-            with open("pyproject.toml", "r") as f:
-                pyproject = toml.load(f)
-                return pyproject["tool"]["poetry"]["version"]
+            # First try to get version from package metadata (works for installed packages)
+            try:
+                return importlib.metadata.version("commi")
+            except importlib.metadata.PackageNotFoundError:
+                pass
+
+            # If that fails, try to find pyproject.toml relative to the module
+            module_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            pyproject_path = os.path.join(module_dir, "pyproject.toml")
+
+            if os.path.exists(pyproject_path):
+                with open(pyproject_path, "r") as f:
+                    pyproject = toml.load(f)
+                    return pyproject["tool"]["poetry"]["version"]
+
+            # If all else fails, use a fallback version
+            return "3.0.3"  # Fallback to current version
         except Exception as e:
-            raise Exception(f"Failed to get installed version: {e}")
+            # Log the error but return a fallback version instead of raising
+            import sys
+
+            print(f"Warning: Failed to get installed version: {e}", file=sys.stderr)
+            return "3.0.3"  # Fallback to current version
 
     def get_latest_version(self):
         """Get the latest version from GitHub releases"""
