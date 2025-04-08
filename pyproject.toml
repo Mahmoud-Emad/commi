@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "commi"
-version = "3.0.1"
+version = "3.0.2"
 description = "AI-powered Git commit message generator."
 authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
 readme = "README.md"
