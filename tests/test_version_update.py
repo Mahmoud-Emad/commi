@@ -86,19 +86,30 @@ def test_update_binary():
     with patch("subprocess.run") as mock_run, patch(
         "subprocess.check_output", return_value=b"/usr/local/bin/commi\n"
     ):
+        # Configure mock_run to handle the curl check
+        # First call is to check if curl is installed, should return 0 (success)
+        mock_run.side_effect = [
+            Mock(returncode=0),  # which curl - return success
+            Mock(),  # curl download
+            Mock(),  # chmod
+            Mock()   # sudo mv
+        ]
         
         # Install curl first
         cmd = MockCommiCommands(installed_version="2.2.5", latest_version="v2.3.0")
         result = cmd.update_binary()
         assert result is True
 
-        assert mock_run.call_count == 3
-        # Check curl command
-        assert mock_run.call_args_list[0][0][0][0] == "curl"
+        assert mock_run.call_count == 4
+        # Check which curl command
+        assert mock_run.call_args_list[0][0][0][0] == "which"
+        assert mock_run.call_args_list[0][0][0][1] == "curl"
+        # Check curl download command
+        assert mock_run.call_args_list[1][0][0][0] == "curl"
         # Check chmod command
-        assert mock_run.call_args_list[1][0][0][0] == "chmod"
+        assert mock_run.call_args_list[2][0][0][0] == "chmod"
         # Check mv command
-        assert mock_run.call_args_list[2][0][0][0] == "sudo"
+        assert mock_run.call_args_list[3][0][0][0] == "sudo"
 
 
 def test_update_binary_error():
