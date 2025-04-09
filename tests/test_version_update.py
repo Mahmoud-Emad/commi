@@ -86,11 +86,12 @@ def test_update_binary():
     with patch("subprocess.run") as mock_run, patch(
         "subprocess.check_output", return_value=b"/usr/local/bin/commi\n"
     ):
-
+        
+        # Install curl first
         cmd = MockCommiCommands(installed_version="2.2.5", latest_version="v2.3.0")
         result = cmd.update_binary()
-
         assert result is True
+
         assert mock_run.call_count == 3
         # Check curl command
         assert mock_run.call_args_list[0][0][0][0] == "curl"

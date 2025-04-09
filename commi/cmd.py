@@ -4,6 +4,7 @@ import argparse
 import sys
 import subprocess
 from datetime import timedelta
+from commi.logs import LOGGER
 
 
 class CommiCommands:
@@ -93,14 +94,12 @@ class CommiCommands:
                     pyproject = toml.load(f)
                     return pyproject["tool"]["poetry"]["version"]
 
-            # If all else fails, use a fallback version
-            return "3.0.3"  # Fallback to current version
+            return None
         except Exception as e:
-            # Log the error but return a fallback version instead of raising
             import sys
 
-            print(f"Warning: Failed to get installed version: {e}", file=sys.stderr)
-            return "3.0.3"  # Fallback to current version
+            LOGGER.warning(f"Failed to get installed version: {e}", file=sys.stderr)
+            return None
 
     def get_latest_version(self):
         """Get the latest version from GitHub releases"""
@@ -130,19 +129,68 @@ class CommiCommands:
     def update_binary(self):
         """Update the binary to the latest version"""
         try:
-            print(
-                f"Updating Commi from {self.installed_version} to {self.latest_version}..."
+            LOGGER.info(
+                f"Updating Commi from {self.installed_version} to {self.latest_version}"
             )
 
-            # Download the latest release binary
-            release_url = f"https://github.com/Mahmoud-Emad/commi/releases/download/{self.latest_version}/commi"
-            temp_binary = "/tmp/commi_new"
+            # We need to check the user platform first
+            import platform
 
-            # Download the binary
-            subprocess.run(["curl", "-L", release_url, "-o", temp_binary], check=True)
+            publishing_name = "commi-"
+            # Check if the platform isn't linux, check if macos
+            if platform.system().lower() == "darwin":
+                publishing_name = "commi-macos"
+            elif platform.system().lower() == "linux":
+                publishing_name = "commi-linux"
+            else:
+                LOGGER.error("Unsupported platform")
+                return False
+
+            # Download the latest release binary
+            releases_page = "https://github.com/Mahmoud-Emad/commi/releases"
+            release_url = (
+                f"{releases_page}/download/{self.latest_version}/{publishing_name}"
+            )
+
+            # Now we need to make sure first that the release is a valid binary
+
+            LOGGER.info("Validating the latest release binary")
+            response = requests.head(release_url, timeout=5)
+            if response.status_code == 404:
+                LOGGER.error("Failed to download the latest release binary.")
+                LOGGER.error(f"The binary not found at {release_url}.")
+                LOGGER.error(f"You could check the release page at {releases_page}.")
+                return False
+
+            # Create a temporary binary
+            temp_binary = "/tmp/commi"
+
+            # Check if curl is installed
+            LOGGER.info("Checking if curl is installed")
+            if (
+                subprocess.run(
+                    ["which", "curl"], check=False, stdout=subprocess.DEVNULL
+                ).returncode
+                != 0
+            ):
+                LOGGER.error("curl is not installed. Please install it and try again.")
+                return False
+
+            # Download the binary, and rename it to binname
+            LOGGER.info("Downloading the latest release binary please be patient...")
+            subprocess.run(
+                ["curl", "-L", release_url, "-o", temp_binary],
+                check=True,
+                stdout=subprocess.PIPE,
+            )
 
             # Make it executable
-            subprocess.run(["chmod", "+x", temp_binary], check=True)
+            LOGGER.info("Making the binary executable")
+            subprocess.run(
+                ["chmod", "+x", temp_binary],
+                check=True,
+                stdout=subprocess.DEVNULL,
+            )
 
             # Get the current binary path
             current_binary = (
@@ -150,9 +198,10 @@ class CommiCommands:
             )
 
             # Replace the current binary with the new one
+            LOGGER.info("Replacing the current binary with the new one")
             subprocess.run(["sudo", "mv", temp_binary, current_binary], check=True)
 
-            print(f"Successfully updated Commi to version {self.latest_version}!")
+            LOGGER.info(f"Successfully updated Commi to version {self.latest_version}!")
             return True
         except Exception as e:
             print(f"Error updating Commi: {e}")
