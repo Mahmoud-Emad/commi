@@ -92,9 +92,9 @@ def test_update_binary():
             Mock(returncode=0),  # which curl - return success
             Mock(),  # curl download
             Mock(),  # chmod
-            Mock()   # sudo mv
+            Mock(),  # sudo mv
         ]
-        
+
         # Install curl first
         cmd = MockCommiCommands(installed_version="2.2.5", latest_version="v2.3.0")
         result = cmd.update_binary()
