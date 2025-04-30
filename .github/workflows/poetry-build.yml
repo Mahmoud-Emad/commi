@@ -1,4 +1,4 @@
-name: Build
+name: Poetry Build
 
 on:
   push:
