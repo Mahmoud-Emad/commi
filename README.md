@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Mahmoud-Emad/commi)
+
 # Commi: AI-powered Git Commit Message Generator
 
 Commi is an AI-powered tool that automatically generates Git commit messages based on your code changes. It uses Google's **Gemini AI** to analyze your Git diffs and suggest meaningful, descriptive commit messages. Commi helps save time and ensures your commit history is consistent and descriptive.
