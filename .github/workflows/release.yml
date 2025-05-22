@@ -78,17 +78,24 @@ jobs:
     - name: Build for macOS
       if: matrix.platform == 'macos'
       run: |
-        # Make build.sh executable
-        chmod +x ./build.sh
+        # Set environment variables for gRPC on macOS
+        export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+        export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
         
-        # Run the build script to properly handle gRPC installation
-        ./build.sh
+        # Use pre-built wheels for macOS instead of building from source
+        poetry run pip uninstall -y grpcio grpcio-tools
+        poetry run pip install --only-binary=grpcio grpcio==1.62.0
         
-        # Copy the generated binary to the dist directory
-        cp commi_* dist/commi
+        # Verify the installation
+        poetry run python -c "import grpc; print('gRPC successfully imported')"
         
-        # Verify the binary works by checking if it can import the problematic module
-        ./dist/commi --version || true
+        # Build the binary with the pre-built wheels
+        poetry run shiv . \
+          --console-script commi \
+          --output-file 'dist/commi${{ matrix.binary_ext }}' \
+          --python '/usr/bin/env python3' \
+          --entry-point 'commi.run:main' \
+          --compressed
         
     - name: Upload binary to release
       uses: actions/upload-release-asset@v1
