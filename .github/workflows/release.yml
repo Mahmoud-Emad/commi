@@ -65,8 +65,21 @@ jobs:
     - name: Prepare dist directory
       run: mkdir -p dist
         
+    - name: Install gRPC properly for macOS
+      if: matrix.platform == 'macos'
+      run: |
+        export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+        export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+        poetry run pip uninstall -y grpcio grpcio-tools
+        poetry run pip install --no-cache-dir --force-reinstall grpcio grpcio-tools
+        
     - name: Build binary
       run: |
+        # Set environment variables for macOS to ensure proper gRPC compilation
+        if [ "${{ matrix.platform }}" = "macos" ]; then
+          export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+          export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+        fi
         poetry run shiv . \
           --console-script commi \
           --output-file 'dist/commi${{ matrix.binary_ext }}' \
