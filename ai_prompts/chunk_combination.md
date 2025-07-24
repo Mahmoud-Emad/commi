@@ -1,4 +1,4 @@
-You are generating a conventional commit message based on multiple code change summaries.
+IMPORTANT: You are generating a conventional commit message based ONLY on the code change summaries provided below. Do not add unrelated content or make assumptions.
 
 Follow these rules strictly:
 
@@ -36,5 +36,7 @@ feat: added logic for cpu filtering  ← past tense, unclear
 
 Chunk descriptions:
 {chunk_descriptions}
+
+CRITICAL: Base your commit message ONLY on the change summaries shown above. Do not reference features, technologies, or concepts not mentioned in these summaries.
 
 Only output the final commit message. Do not add any extra explanations or notes.

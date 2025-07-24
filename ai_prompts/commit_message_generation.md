@@ -1,15 +1,19 @@
+IMPORTANT: You must analyze the actual code changes provided below and generate a commit message that accurately describes ONLY those changes. Do not make assumptions or add unrelated content.
+
 Given the following code changes, generate a commit message following these guidelines:
 
-1. Start with a type prefix from the following list:
+1. FIRST: Carefully read and understand the actual changes in the diff
+2. Start with a type prefix from the following list:
 {commit_types}
 
-2. After the type, add a colon and space, then a short (50 chars or less) summary
-3. If the changes are complex, add a blank line and then bullet points describing the changes
-4. Use imperative mood (e.g., "add" not "added")
-5. Focus on what changed and why, not how
-6. Be specific but concise - keep bullet points short (max 60 chars each)
-7. Limit to maximum 5 bullet points for readability
-8. Match the formatting shown in the example strictly
+3. After the type, add a colon and space, then a short (50 chars or less) summary that accurately describes the actual changes shown in the diff
+4. If the changes are complex, add a blank line and then bullet points describing the changes
+5. Use imperative mood (e.g., "add" not "added")
+6. Focus on what actually changed based on the diff, not assumptions
+7. Be specific but concise - keep bullet points short (max 60 chars each)
+8. Limit to maximum 5 bullet points for readability
+9. Match the formatting shown in the example strictly
+10. DO NOT invent features or changes that are not visible in the provided diff
 
 {retry_guidance}
 
@@ -23,6 +27,8 @@ feat: add CPU architecture filtering
 
 Code changes:
 {diff_text}
+
+CRITICAL: Base your commit message ONLY on the changes shown above in the diff. Do not reference features, technologies, or concepts not present in the actual changes.
 
 Generate only the commit message, no additional text.
 
