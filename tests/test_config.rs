@@ -19,8 +19,10 @@ fn test_config_get_api_key() {
     let mut cmd = Command::cargo_bin("commi").unwrap();
     cmd.env("COMMI_TEST_MODE", "1"); // Use test config file
     cmd.args(["config", "get", "api-key"]);
-    // This should succeed regardless of whether key is set
-    cmd.assert().success();
+    // Should succeed when API key is in config file
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("api-key:"));
 }
 
 #[test]
