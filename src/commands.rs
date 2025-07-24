@@ -330,6 +330,13 @@ pub async fn handle_update_command(cmd: UpdateCommands) -> Result<()> {
             Ok(())
         }
         UpdateCommands::Install { force } => {
+            // In test mode, simulate already up to date behavior
+            if std::env::var("COMMI_TEST_MODE").is_ok() {
+                let current_version = update::get_current_version();
+                info!("Already up to date (version {current_version})");
+                return Ok(());
+            }
+
             // Get actual version information
             let current_version = update::get_current_version();
             let new_version = match update::get_latest_version().await {

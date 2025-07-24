@@ -23,6 +23,11 @@ const GITHUB_API_URL: &str = "https://api.github.com/repos/Mahmoud-Emad/commi/re
 const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub async fn check_for_updates() -> Result<bool> {
+    // In test mode, simulate no updates available
+    if env::var("COMMI_TEST_MODE").is_ok() {
+        return Ok(false);
+    }
+
     let client = Client::new();
 
     let response = client
@@ -59,6 +64,11 @@ pub async fn check_for_updates() -> Result<bool> {
 
 /// Get the latest version from GitHub releases with caching
 pub async fn get_latest_version() -> Result<String> {
+    // In test mode, return current version to simulate "already up to date"
+    if env::var("COMMI_TEST_MODE").is_ok() {
+        return Ok(CURRENT_VERSION.to_string());
+    }
+
     // Try to get cached version first
     if let Ok(cached_version) = get_cached_version().await {
         return Ok(cached_version);
@@ -149,6 +159,12 @@ pub fn compare_versions(current: &str, latest: &str) -> Result<std::cmp::Orderin
 
 pub async fn update_binary() -> Result<()> {
     info!("Checking for updates...");
+
+    // In test mode, simulate already up to date
+    if env::var("COMMI_TEST_MODE").is_ok() {
+        info!("You're already running the latest version (v{CURRENT_VERSION})");
+        return Ok(());
+    }
 
     let client = Client::new();
 
