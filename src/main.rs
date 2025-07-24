@@ -237,7 +237,7 @@ async fn run_legacy(args: LegacyArgs) -> Result<()> {
 
     // Display the generated commit message
     println!("\n{}", color_success("Generated Commit Message:"));
-    println!("{commit_message}");
+    println!("\n{commit_message}\n");
 
     // Handle commit operation
     if args.commit {
