@@ -1,0 +1,78 @@
+[package]
+name = "commi"
+version = "4.0.0"
+edition = "2021"
+rust-version = "1.70"
+authors = ["Mahmoud Emad <mahmmoud.hassanein@gmail.com>"]
+description = "Fast, reliable AI-powered Git commit message generator using Google's Gemini AI"
+license = "MIT"
+repository = "https://github.com/Mahmoud-Emad/commi"
+homepage = "https://github.com/Mahmoud-Emad/commi"
+documentation = "https://docs.rs/commi"
+readme = "README.md"
+keywords = ["git", "commit", "ai", "gemini", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+include = ["src/**/*", "docs/commi.1", "README.md", "LICENSE", "CHANGELOG.md"]
+
+[[bin]]
+name = "commi"
+path = "src/main.rs"
+
+[dependencies]
+# CLI and argument parsing
+clap = { version = "4.4", features = ["derive", "env", "color", "suggestions"] }
+clap_complete = "4.4"
+strsim = "0.10"
+console = "0.15"
+dialoguer = "0.11"
+
+# Git operations
+git2 = { version = "0.18", default-features = false, features = ["https"] }
+
+# HTTP client for API calls
+reqwest = { version = "0.11", features = [
+    "json",
+    "rustls-tls",
+], default-features = false }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+
+# JSON and TOML handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Error handling
+anyhow = "1.0"
+
+# Logging
+env_logger = { version = "0.10", default-features = false, features = [
+    "auto-color",
+    "humantime",
+] }
+log = "0.4"
+
+# Configuration and environment
+dotenv = "0.15"
+chrono = { version = "0.4", features = ["serde"] }
+
+# Clipboard operations
+arboard = { version = "3.2", default-features = false }
+
+# Version comparison (for update functionality)
+semver = { version = "1.0", default-features = false }
+
+[dev-dependencies]
+tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = "z"         # Optimize for size
+overflow-checks = false
+
+[profile.dev]
+debug = true

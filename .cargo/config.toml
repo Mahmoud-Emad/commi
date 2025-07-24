@@ -1,0 +1,41 @@
+# Use faster linker on Linux only
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+# macOS uses the default linker (no lld needed)
+[target.x86_64-apple-darwin]
+# Use default linker on macOS
+
+[target.aarch64-apple-darwin]
+# Use default linker on macOS
+
+# Optimize for size in release builds
+[profile.release]
+opt-level = "z"   # Optimize for size
+lto = true        # Enable Link Time Optimization
+codegen-units = 1 # Reduce number of codegen units to increase optimizations
+panic = "abort"   # Abort on panic (smaller binary)
+strip = true      # Strip symbols from binary
+
+# Fast builds for development
+[profile.dev]
+opt-level = 0
+debug = true
+split-debuginfo = "unpacked"
+
+# Optimized development profile
+[profile.dev-opt]
+inherits = "dev"
+opt-level = 1
+
+# Test profile
+[profile.test]
+opt-level = 0
+debug = true
+
+# Benchmark profile
+[profile.bench]
+opt-level = 3
+debug = false
+lto = true

@@ -1,0 +1,110 @@
+name: Rust Build and Release
+
+on:
+  push:
+    branches: [ '*' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ '*' ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Run tests
+      run: cargo test --verbose
+
+  build:
+    name: Build
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_name: commi
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary_name: commi
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary_name: commi
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_name: commi.exe
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Build binary
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Strip binary (Unix)
+      if: matrix.os != 'windows-latest'
+      run: strip target/${{ matrix.target }}/release/${{ matrix.binary_name }}
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: commi-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/${{ matrix.binary_name }}
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          commi-x86_64-unknown-linux-gnu/commi
+          commi-x86_64-apple-darwin/commi
+          commi-aarch64-apple-darwin/commi
+          commi-x86_64-pc-windows-msvc/commi.exe
+          commi.1
+          install-man.sh
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

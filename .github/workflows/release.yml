@@ -1,108 +1,96 @@
-name: Release Binaries
+name: Release
 
 on:
   push:
     tags:
       - 'v*'
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   create-release:
+    name: Create Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+    - uses: actions/checkout@v4
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
 
-  build-and-release:
+  build-and-upload:
+    name: Build and Upload
     needs: create-release
-    permissions:
-      contents: write
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
-            platform: linux
-            binary_ext: ''
+            target: x86_64-unknown-linux-gnu
+            artifact_name: commi
+            asset_name: commi-x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: commi.exe
+            asset_name: commi-x86_64-pc-windows-msvc.exe
           - os: macos-latest
-            platform: macos
-            binary_ext: ''
-          # - os: windows-latest
-          #   platform: windows
-          #   binary_ext: '.exe'
-    
-    runs-on: ${{ matrix.os }}
-    
+            target: x86_64-apple-darwin
+            artifact_name: commi
+            asset_name: commi-x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: commi
+            asset_name: commi-aarch64-apple-darwin
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - uses: dtolnay/rust-toolchain@stable
       with:
-        python-version: '3.12'
-        
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        
-    - name: Install dependencies
-      run: poetry install
-        
-    - name: Create .env file
-      run: |
-        echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" > .env
-        
-    - name: Prepare dist directory
-      run: mkdir -p dist
-        
-    - name: Build for Linux
-      if: matrix.platform == 'linux'
-      run: |
-        poetry run shiv . \
-          --console-script commi \
-          --output-file 'dist/commi${{ matrix.binary_ext }}' \
-          --python '/usr/bin/env python3' \
-          --entry-point 'commi.run:main' \
-          --compressed
+        targets: ${{ matrix.target }}
 
-    - name: Build for macOS
-      if: matrix.platform == 'macos'
-      run: |
-        # Set environment variables for gRPC on macOS
-        export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
-        export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
-        
-        # Use pre-built wheels for macOS instead of building from source
-        poetry run pip uninstall -y grpcio grpcio-tools
-        poetry run pip install --only-binary=grpcio grpcio==1.62.0
-        
-        # Verify the installation
-        poetry run python -c "import grpc; print('gRPC successfully imported')"
-        
-        # Build the binary with the pre-built wheels
-        poetry run shiv . \
-          --console-script commi \
-          --output-file 'dist/commi${{ matrix.binary_ext }}' \
-          --python '/usr/bin/env python3' \
-          --entry-point 'commi.run:main' \
-          --compressed
-        
-    - name: Upload binary to release
+    - name: Build release
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Strip binary (Linux and macOS)
+      if: matrix.os != 'windows-latest'
+      run: strip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+
+    - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ needs.create-release.outputs.upload_url }}
-        asset_path: ./dist/commi${{ matrix.binary_ext }}
-        asset_name: commi-${{ matrix.platform }}${{ matrix.binary_ext }}
+        asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
         asset_content_type: application/octet-stream
+
+  publish-crate:
+    name: Publish to crates.io
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Publish to crates.io
+      run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  update-homebrew:
+    name: Update Homebrew Formula
+    needs: [create-release, build-and-upload]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Update Homebrew formula
+      uses: dawidd6/action-homebrew-bump-formula@v3
+      with:
+        token: ${{ secrets.HOMEBREW_TOKEN }}
+        formula: commi
