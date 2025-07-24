@@ -51,7 +51,8 @@ jobs:
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }}
 
-    - name: Verify binary was built
+    - name: Verify binary was built (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
         if [ ! -f "target/${{ matrix.target }}/release/${{ matrix.artifact_name }}" ]; then
           echo "Error: Binary not found at target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
@@ -59,17 +60,35 @@ jobs:
         fi
         echo "Binary built successfully: $(ls -la target/${{ matrix.target }}/release/${{ matrix.artifact_name }})"
 
+    - name: Verify binary was built (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        if (!(Test-Path "target/${{ matrix.target }}/release/${{ matrix.artifact_name }}")) {
+          Write-Host "Error: Binary not found at target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
+          exit 1
+        }
+        Write-Host "Binary built successfully: $(Get-ChildItem target/${{ matrix.target }}/release/${{ matrix.artifact_name }})"
+
     - name: Strip binary (Linux and macOS)
       if: matrix.os != 'windows-latest'
       run: strip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
 
-    - name: Rename binary
+    - name: Rename binary (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
         mkdir -p release-assets
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
         echo "Asset prepared: $(ls -la release-assets/${{ matrix.asset_name }})"
 
-    - name: Extract changelog for current version
+    - name: Rename binary (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        New-Item -ItemType Directory -Force -Path release-assets
+        Copy-Item target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
+        Write-Host "Asset prepared: $(Get-ChildItem release-assets/${{ matrix.asset_name }})"
+
+    - name: Extract changelog for current version (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
         # Extract the current version from the tag
         VERSION=${GITHUB_REF#refs/tags/v}
@@ -86,7 +105,20 @@ jobs:
           echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> current_changelog.md
         fi
 
-    - name: Debug files before upload
+    - name: Extract changelog for current version (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Extract the current version from the tag
+        $VERSION = $env:GITHUB_REF -replace 'refs/tags/v', ''
+        echo "VERSION=$VERSION" >> $env:GITHUB_ENV
+
+        # Create a simple changelog for Windows (awk is not available)
+        echo "## Changes in v$VERSION" > current_changelog.md
+        echo "" >> current_changelog.md
+        echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> current_changelog.md
+
+    - name: Debug files before upload (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
         echo "Files to upload:"
         ls -la release-assets/
@@ -94,6 +126,16 @@ jobs:
         echo "Asset name: ${{ matrix.asset_name }}"
         echo "Target: ${{ matrix.target }}"
         echo "OS: ${{ matrix.os }}"
+
+    - name: Debug files before upload (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        Write-Host "Files to upload:"
+        Get-ChildItem release-assets/
+        Get-ChildItem CHANGELOG.md, current_changelog.md
+        Write-Host "Asset name: ${{ matrix.asset_name }}"
+        Write-Host "Target: ${{ matrix.target }}"
+        Write-Host "OS: ${{ matrix.os }}"
 
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
