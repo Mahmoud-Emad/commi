@@ -4,7 +4,7 @@
 # POSIX-compliant shell script to install commi from GitHub releases
 #
 # Usage:
-#   curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/scripts/install.sh | sh
+#   curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/development_install/scripts/quick-install.sh | sh
 
 set -e  # Exit on any error
 
