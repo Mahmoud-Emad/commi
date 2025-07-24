@@ -59,7 +59,8 @@ get_latest_release_url() {
     if command_exists jq; then
         url=$(jq -r ".assets[] | select(.name == \"$asset_name\") | .browser_download_url" "$tmpfile")
     else
-        url=$(grep "\"name\":\"$asset_name\"" "$tmpfile" -A 10 | grep browser_download_url | head -1 | sed 's/.*: \"\(.*\)\".*/\1/')
+        # Fallback: find the asset name, then get the download URL from the same asset block
+        url=$(awk "/\"name\":\"$asset_name\"/{found=1} found && /\"browser_download_url\":/{gsub(/.*\"browser_download_url\":\"/, \"\"); gsub(/\".*/, \"\"); print; exit}" "$tmpfile")
     fi
 
     if [ -z "$url" ]; then
