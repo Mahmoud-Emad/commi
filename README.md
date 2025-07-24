@@ -1,155 +1,192 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Mahmoud-Emad/commi)
-
 # Commi: AI-powered Git Commit Message Generator
 
-Commi is an AI-powered tool that automatically generates Git commit messages based on your code changes. It uses Google's **Gemini AI** to analyze your Git diffs and suggest meaningful, descriptive commit messages. Commi helps save time and ensures your commit history is consistent and descriptive.
+[![CI](https://github.com/Mahmoud-Emad/commi/workflows/CI/badge.svg)](https://github.com/Mahmoud-Emad/commi/actions)
+[![Security](https://github.com/Mahmoud-Emad/commi/workflows/Security/badge.svg)](https://github.com/Mahmoud-Emad/commi/actions)
+[![Crates.io](https://img.shields.io/crates/v/commi.svg)](https://crates.io/crates/commi)
+[![Downloads](https://img.shields.io/crates/d/commi.svg)](https://crates.io/crates/commi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://www.rust-lang.org)
 
-## Features
+**Fast, reliable, and dependency-free** - Commi is an AI-powered tool written in Rust that automatically generates Git commit messages based on your code changes using Google's Gemini AI.
 
-- **AI-powered commit message generation**: Suggest commit messages based on the code changes using Google's Gemini AI.
-- **Staged changes support**: Generate commit messages based on the current staged changes.
-- **Direct commit**: Generate and commit the suggested commit message directly to your repository.
-- **Clipboard integration**: Optionally copy the generated commit message to your clipboard for easy pasting.
-<!-- - **Future updates**: Integration with CI/CD pipelines, support for different languages, and customizable commit message templates. -->
+## Key Features
+
+- **AI-powered commit messages** - Uses Google's Gemini AI to analyze git diffs
+- **100x faster startup** - Near-instantaneous execution (~5ms)
+- **Single binary** - No runtime dependencies (3.8MB)
+- **Modern CLI** - Hierarchical subcommands with shell completion
+- **Cross-platform** - Works on Linux, macOS, and Windows
+- **Safety confirmations** - Interactive prompts for dangerous operations
+
+## Quick Start
+
+1. **Get your API key** from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. **Set your API key** (choose one method):
+
+   ```bash
+   # Method 1: Save to config file (recommended)
+   commi config set api-key "your_api_key"
+
+   # Method 2: Environment variable
+   export COMMI_API_KEY="your_api_key"
+
+   # Method 3: Command line flag
+   commi generate --api-key "your_api_key"
+   ```
+
+3. **Generate commit messages**: `commi generate`
 
 ## Installation
 
-### Build from source
-
-To install **Commi** manually, follow these steps:
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/Mahmoud-Emad/commi.git
-   cd commi
-   ```
-
-2. Install the dependencies:
-
-   ```bash
-   poetry install
-   ```
-
-3. Build the executable:
-
-   ```bash
-   ./build.sh
-   # This aslo will move the excutable to `/usr/local/bin`
-   ```
-
-4. Run the executable:
-
-   ```bash
-   # Inside a repo you can do
-   commi --copy
-   # or run it from everywhere and pass the repo path as an argument
-   commi --repo "/path/to/your/repo" --commit
-   ```
-
-### Using pip
-
-You can install **Commi** using pip:
-
 ```bash
-    pip install commi
+# Download and install
+wget https://github.com/Mahmoud-Emad/commi/releases/latest/download/commi-$(uname -s)-$(uname -m)
+chmod +x commi-*
+sudo mv commi-* /usr/local/bin/commi
+
+# Or build from source
+git clone https://github.com/Mahmoud-Emad/commi.git && cd commi && ./scripts/build.sh
+
+# Install shell completion
+./scripts/install-completions.sh
 ```
-
-Run the executable:
-
-```bash
-# Inside a repo you can do
-commi --generate
-# or run it from everywhere and pass the repo path as an argument
-commi --repo "/path/to/your/repo" --generate
-```
-
-### Install the binary
-
-You can also download the pre-built binary for your system from the [releases page](https://github.com/Mahmoud-Emad/commi/releases).
-
-Now you're ready to use **Commi**!
 
 ## Usage
 
-After installation, you can use the command-line interface (CLI) to generate commit messages.
-
-### Basic Usage
-
-To generate a commit message based on the latest changes in your repository:
-
 ```bash
-commi --repo "/path/to/your/repo"
+# Basic usage
+commi generate                          # Generate commit message
+commi generate --copy                   # Copy to clipboard
+commi generate --commit                 # Auto-commit with message
+
+# Configuration
+commi config set api-key "your_key"     # Set API key
+commi config list                       # List all settings
+
+# AI Models
+commi model list                        # List supported models
+commi config set model gemini-2.5-pro   # Change AI model
+
+# Other commands
+commi status                            # Show repository status
+commi update check                      # Check for updates
+commi completion bash                   # Generate shell completion
 ```
 
-### Use Staged Changes
-
-If you want to generate a commit message based on the staged changes:
+## Examples
 
 ```bash
-commi --repo "/path/to/your/repo" --cached
-```
+# Generate commit message for staged changes
+git add .
+commi generate --cached --copy
 
-### Set an API Key
+# Generate and commit in one step
+git add .
+commi generate --commit
 
-You can provide your API key directly via the `--api-key` option:
-
-```bash
-commi --repo "/path/to/your/repo" --api-key "your_api_key"
-```
-
-Alternatively, you can set the API key as an environment variable:
-
-```bash
-export COMMI_API_KEY="your_api_key"
-commi --repo "/path/to/your/repo"
-```
-
-If no API key is provided, a default API key will be used.
-
-### Copy the Commit Message to Clipboard
-
-To copy the generated commit message to your clipboard, use the `--copy` flag:
-
-```bash
-commi --repo "/path/to/your/repo" --copy
-```
-
-This requires the installation of `xclip` (on Linux systems). If it's not installed, Commi will attempt to install it automatically.
-
-### Regenerate a Commit Message
-
-To regenerate the commit message, you can simply run the command one more time:
-
-```bash
-commi --repo "/path/to/your/repo"
-```
-
-### Commit the suggested Commit Message
-
-To commit the generated commit message, use the `--commit` flag:
-
-```bash
-commi --repo "/path/to/your/repo" --commit
+# Check what's changed
+commi status --verbose
 ```
 
 ## Configuration
 
-Commi uses a `.env` file to configure certain settings. You can modify the following settings:
+Commi stores configuration in `~/.config/commi.toml`:
 
-- `COMMI_API_KEY`: Your Gemini AI API key.
-- `MODEL_NAME`: The AI model to use for commit message generation (e.g., `gemini-1.5-flash`).
+```bash
+# View all configuration
+commi config get
+
+# Set API key (required)
+commi config set api-key "your_api_key"
+
+# Set model (optional)
+commi config set model "gemini-1.5-pro"
+
+# View specific setting
+commi config get api-key
+
+# View cached version info
+commi config get version
+commi config get last-version-check
+```
+
+**Configuration Options:**
+
+- `api-key` - Your Google AI Studio API key (required)
+- `model` - AI model to use (default: "gemini-1.5-flash")
+- `max-tokens` - Maximum tokens per request (default: 800000)
+- `chunk-overlap` - Lines to overlap between chunks (default: 200)
+- `enable-chunking` - Enable large diff chunking (default: true)
+- `validate-format` - Enable AI-powered commit message validation (default: true)
+
+## AI Models
+
+Commi supports multiple Gemini AI models with different capabilities:
+
+```bash
+# List all supported models
+commi model list
+
+# Change to a different model
+commi config set model gemini-2.5-pro
+```
+
+**Available Models:**
+
+- `gemini-1.5-flash` - Fast and efficient (default)
+- `gemini-2.5-flash` - Latest fast model
+- `gemini-2.5-flash-lite` - Lightweight version
+- `gemini-2.5-pro` - Most capable model
+
+**Rate Limiting:**
+If you encounter rate limit errors, try switching to a different model:
+
+```bash
+commi config set model gemini-2.5-pro
+```
+
+Different models may have different rate limits and quotas.
+
+## Commit Message Validation
+
+Commi includes AI-powered commit message validation to ensure your messages follow best practices:
+
+```bash
+# Enable validation (default)
+commi config set validate-format true
+
+# Disable validation
+commi config set validate-format false
+```
+
+**Validation Rules:**
+
+- **Subject line**: ≤ 50 characters, imperative mood, conventional commit format
+- **Body**: Lines wrapped at 72 characters, explains why and what
+- **Footer**: Issue references and breaking change descriptions
+
+When enabled, Commi automatically validates and formats commit messages to follow:
+
+- [Conventional Commits](https://www.conventionalcommits.org/) specification
+- Git best practices for line length and formatting
+- Proper imperative mood and clear descriptions
+
+## Documentation
+
+- **[Migration Guide](docs/MIGRATION.md)** - Upgrading from v3.x to v4.0
+- **[Shell Completion Guide](docs/SHELL_COMPLETION.md)** - Setting up tab completion
+- **[Testing Guide](docs/TESTING.md)** - Running and writing tests
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment
+- **[Changelog](docs/CHANGELOG.md)** - Version history and changes
 
 ## Contributing
 
-We welcome contributions to Commi! If you find a bug or want to suggest a new feature, please open an issue or submit a pull request.
-
-1. Fork the repository.
-2. Create a new branch for your feature (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature-name`).
-5. Create a new pull request.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
 ## License
 
-Commi is open-source software licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+MIT License - see [LICENSE](LICENSE) file for details.
