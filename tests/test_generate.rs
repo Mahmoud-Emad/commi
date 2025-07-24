@@ -128,10 +128,63 @@ fn test_generate_with_co_author() {
 
 #[test]
 fn test_generate_missing_api_key() {
+    use std::process::Command as StdCommand;
+    use tempfile::TempDir;
+
+    // Create a temporary git repository with changes
+    let temp_dir = TempDir::new().unwrap();
+    let repo_path = temp_dir.path();
+
+    // Initialize git repo and create a change
+    StdCommand::new("git")
+        .args(["init"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
+    StdCommand::new("git")
+        .args(["config", "user.name", "Test User"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
+    StdCommand::new("git")
+        .args(["config", "user.email", "test@example.com"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
+    // Create initial commit
+    std::fs::write(repo_path.join("initial.txt"), "initial content").unwrap();
+    StdCommand::new("git")
+        .args(["add", "initial.txt"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
+    StdCommand::new("git")
+        .args(["commit", "-m", "Initial commit"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
+    // Create a new file and stage it for testing
+    std::fs::write(repo_path.join("test.txt"), "test content").unwrap();
+    StdCommand::new("git")
+        .args(["add", "test.txt"])
+        .current_dir(repo_path)
+        .output()
+        .unwrap();
+
     let mut cmd = Command::cargo_bin("commi").unwrap();
     cmd.env("COMMI_TEST_MODE", "1"); // Use test config file (which will be empty)
-    cmd.args(["generate"]);
-    // Don't set COMMI_API_KEY
+    cmd.env_remove("COMMI_API_KEY"); // Ensure no API key is set
+    cmd.args([
+        "generate",
+        "--repo",
+        repo_path.to_str().unwrap(),
+        "--cached",
+    ]);
 
     cmd.assert()
         .failure()
