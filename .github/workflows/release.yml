@@ -54,14 +54,14 @@ jobs:
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
 
     - name: Extract changelog for current version
-      if: matrix.os == 'ubuntu-latest' && matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
         # Extract the current version from the tag
         VERSION=${GITHUB_REF#refs/tags/v}
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
         # Extract changelog section for current version
-        awk "/^## \[?v?$VERSION\]?/ {flag=1; next} /^## \[?v?[0-9]/ {flag=0} flag" CHANGELOG.md > current_changelog.md
+        # Match patterns like "## [4.0.0]" or "## [v4.0.0]"
+        awk "/^## \[$VERSION\]/ {flag=1; next} /^## \[[0-9]/ {flag=0} flag" CHANGELOG.md > current_changelog.md
 
         # If no version-specific changelog found, create a simple one
         if [ ! -s current_changelog.md ]; then
@@ -78,7 +78,7 @@ jobs:
         files: |
           release-assets/${{ matrix.asset_name }}
           CHANGELOG.md
-        body_path: ${{ matrix.os == 'ubuntu-latest' && matrix.target == 'x86_64-unknown-linux-gnu' && 'current_changelog.md' || '' }}
+        body_path: current_changelog.md
         draft: false
         prerelease: false
 
