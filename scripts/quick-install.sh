@@ -54,6 +54,11 @@ get_latest_release_url() {
         error_exit "curl or wget required"
     fi
 
+    # Debug: check if we got valid JSON
+    if [ ! -s "$tmpfile" ]; then
+        error_exit "Empty response from GitHub API"
+    fi
+
     asset_name="$BINARY_NAME-$platform"
 
     if command_exists jq; then
@@ -65,12 +70,20 @@ get_latest_release_url() {
 
     if [ -z "$url" ]; then
         log_error "No binary found for asset: $asset_name"
-        log_error "Available assets:"
+        printf "[ERROR] Available assets:\n" >&2
         if command_exists jq; then
-            jq -r '.assets[].name' "$tmpfile" | sed 's/^/  - /'
+            jq -r '.assets[].name' "$tmpfile" | while read -r name; do
+                printf "[ERROR]   - %s\n" "$name" >&2
+            done
         else
-            grep '"name":' "$tmpfile" | sed 's/.*"name": *"\([^"]*\)".*/  - \1/'
+            grep '"name":' "$tmpfile" | sed 's/.*"name": *"\([^"]*\)".*/\1/' | while read -r name; do
+                printf "[ERROR]   - %s\n" "$name" >&2
+            done
         fi
+        printf "[ERROR] Debug: tmpfile size: %s bytes\n" "$(wc -c < "$tmpfile")" >&2
+        printf "[ERROR] Debug: first 200 chars of response:\n" >&2
+        head -c 200 "$tmpfile" | sed 's/^/[ERROR] /' >&2
+        printf "\n" >&2
         rm -f "$tmpfile"
         error_exit "Binary not found"
     fi
