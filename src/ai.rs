@@ -102,7 +102,7 @@ impl GeminiClient {
         // Conservative estimate: 1 token ≈ 4 characters for most languages
         // This is based on OpenAI's tokenization, Gemini might be slightly different
         // but this gives us a safe upper bound
-        text.len().div_ceil(4)
+        (text.len() + 3) / 4
     }
 
     /// Check if text exceeds the token limit
@@ -439,9 +439,9 @@ impl GeminiClient {
     ) -> String {
         self.load_chunk_analysis_prompt(chunk, chunk_num, total_chunks)
             .unwrap_or_else(|e| {
-                log::error!("Failed to load chunk analysis prompt: {}", e);
+                log::error!("Failed to load chunk analysis prompt: {e}");
                 log::error!("Please ensure the file 'ai_prompts/chunk_analysis.md' exists and contains a valid prompt");
-                format!("Error: Could not load chunk analysis prompt from ai_prompts/chunk_analysis.md. Please check if the file exists and is properly formatted.")
+                "Error: Could not load chunk analysis prompt from ai_prompts/chunk_analysis.md. Please check if the file exists and is properly formatted.".to_string()
             })
     }
 
@@ -459,9 +459,9 @@ impl GeminiClient {
         let combined_descriptions = chunk_messages.join("\n- ");
         let combine_prompt = self.load_chunk_combination_prompt(&combined_descriptions)
             .unwrap_or_else(|e| {
-                log::error!("Failed to load chunk combination prompt: {}", e);
+                log::error!("Failed to load chunk combination prompt: {e}");
                 log::error!("Please ensure the file 'ai_prompts/chunk_combination.md' exists and contains a valid prompt");
-                format!("Error: Could not load chunk combination prompt from ai_prompts/chunk_combination.md. Please check if the file exists and is properly formatted.")
+                "Error: Could not load chunk combination prompt from ai_prompts/chunk_combination.md. Please check if the file exists and is properly formatted.".to_string()
             });
 
         // Send the combine prompt to the AI
@@ -671,9 +671,9 @@ impl GeminiClient {
 
         self.load_commit_message_generation_prompt(diff_text, retry_guidance, &commit_types)
             .unwrap_or_else(|e| {
-                log::error!("Failed to load commit message generation prompt: {}", e);
+                log::error!("Failed to load commit message generation prompt: {e}");
                 log::error!("Please ensure the file 'ai_prompts/commit_message_generation.md' exists and contains a valid prompt");
-                format!("Error: Could not load commit message generation prompt from ai_prompts/commit_message_generation.md. Please check if the file exists and is properly formatted.")
+                "Error: Could not load commit message generation prompt from ai_prompts/commit_message_generation.md. Please check if the file exists and is properly formatted.".to_string()
             })
     }
 

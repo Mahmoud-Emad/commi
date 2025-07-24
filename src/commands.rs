@@ -202,7 +202,7 @@ pub async fn handle_model(cmd: ModelCommands) -> Result<()> {
                 .config
                 .model
                 .unwrap_or_else(|| "gemini-1.5-flash".to_string());
-            println!("  {}", current_model);
+            println!("  {current_model}");
         }
     }
     Ok(())
@@ -269,7 +269,7 @@ pub async fn handle_config(cmd: ConfigCommands) -> Result<()> {
                 if let Some(key) = key {
                     info!("Resetting configuration key: {}", color_key(&key));
                     Config::reset_config(Some(&key))?;
-                    info!("Configuration key '{}' reset successfully", key);
+                    info!("Configuration key '{key}' reset successfully");
                 } else {
                     info!("Resetting all configuration to defaults");
                     Config::reset_config(None)?;
@@ -311,8 +311,8 @@ pub async fn handle_update_command(cmd: UpdateCommands) -> Result<()> {
             match update::compare_versions(&current_version, &latest_version)? {
                 std::cmp::Ordering::Less => {
                     info!("{}", color_success("A new version is available!"));
-                    info!("Current version: {}", current_version);
-                    info!("Latest version: {}", latest_version);
+                    info!("Current version: {current_version}");
+                    info!("Latest version: {latest_version}");
                     info!("Run 'commi update install' to install the latest version.");
                 }
                 std::cmp::Ordering::Equal => {
@@ -323,8 +323,8 @@ pub async fn handle_update_command(cmd: UpdateCommands) -> Result<()> {
                 }
                 std::cmp::Ordering::Greater => {
                     info!("You are using a newer version than the latest release.");
-                    info!("Current version: {}", current_version);
-                    info!("Latest release: {}", latest_version);
+                    info!("Current version: {current_version}");
+                    info!("Latest release: {latest_version}");
                 }
             }
             Ok(())
@@ -343,22 +343,21 @@ pub async fn handle_update_command(cmd: UpdateCommands) -> Result<()> {
             match update::compare_versions(&current_version, &new_version)? {
                 std::cmp::Ordering::Equal => {
                     if force {
-                        info!("Force reinstalling current version ({})", current_version);
+                        info!("Force reinstalling current version ({current_version})");
                     } else {
-                        info!("Already up to date (version {})", current_version);
+                        info!("Already up to date (version {current_version})");
                         return Ok(());
                     }
                 }
                 std::cmp::Ordering::Greater => {
                     info!(
-                        "The latest version is already installed (current: {}, latest: {})",
-                        current_version, new_version
+                        "The latest version is already installed (current: {current_version}, latest: {new_version})"
                     );
                     return Ok(());
                 }
                 std::cmp::Ordering::Less => {
                     // Update is available, continue
-                    info!("Update available: {} → {}", current_version, new_version);
+                    info!("Update available: {current_version} → {new_version}");
                 }
             }
 

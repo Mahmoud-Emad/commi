@@ -146,6 +146,7 @@ pub struct StatusArgs {
     about = "AI-powered Git commit message generator using Gemini AI",
     hide = true, // Hide from help to encourage new CLI usage
 )]
+#[derive(Default)]
 pub struct LegacyArgs {
     /// Path to Git repository (defaults to current directory)
     #[arg(short = 'r', long = "repo")]
@@ -179,16 +180,3 @@ pub struct LegacyArgs {
 // For backward compatibility, keep the old Args type alias
 pub type Args = LegacyArgs;
 
-impl Default for LegacyArgs {
-    fn default() -> Self {
-        Self {
-            repo: None,
-            api_key: None,
-            cached: false,
-            copy: false,
-            commit: false,
-            co_author: None,
-            update: false,
-        }
-    }
-}

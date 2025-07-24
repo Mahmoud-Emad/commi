@@ -69,7 +69,7 @@ pub async fn get_latest_version() -> Result<String> {
 
     // Update cache
     if let Err(e) = update_version_cache(&version).await {
-        log::warn!("Failed to update version cache: {}", e);
+        log::warn!("Failed to update version cache: {e}");
     }
 
     Ok(version)

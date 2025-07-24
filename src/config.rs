@@ -103,25 +103,25 @@ impl Config {
         let max_tokens = env::var("COMMI_MAX_TOKENS")
             .ok()
             .and_then(|s| s.parse().ok())
-            .or_else(|| toml_config.config.max_tokens)
+            .or(toml_config.config.max_tokens)
             .unwrap_or(800_000); // Conservative limit for Gemini 1.5 Flash
 
         let chunk_overlap = env::var("COMMI_CHUNK_OVERLAP")
             .ok()
             .and_then(|s| s.parse().ok())
-            .or_else(|| toml_config.config.chunk_overlap)
+            .or(toml_config.config.chunk_overlap)
             .unwrap_or(200); // Number of lines to overlap between chunks
 
         let enable_chunking = env::var("COMMI_ENABLE_CHUNKING")
             .ok()
             .map(|s| s.to_lowercase() == "true" || s == "1")
-            .or_else(|| toml_config.config.enable_chunking)
+            .or(toml_config.config.enable_chunking)
             .unwrap_or(true); // Enable chunking by default
 
         let validate_format = env::var("COMMI_VALIDATE_FORMAT")
             .ok()
             .map(|s| s.to_lowercase() == "true" || s == "1")
-            .or_else(|| toml_config.config.validate_format)
+            .or(toml_config.config.validate_format)
             .unwrap_or(true); // Enable validation by default
 
         // Get repository path
@@ -184,25 +184,25 @@ impl Config {
         let max_tokens = env::var("COMMI_MAX_TOKENS")
             .ok()
             .and_then(|s| s.parse().ok())
-            .or_else(|| toml_config.config.max_tokens)
+            .or(toml_config.config.max_tokens)
             .unwrap_or(800_000); // Conservative limit for Gemini 1.5 Flash
 
         let chunk_overlap = env::var("COMMI_CHUNK_OVERLAP")
             .ok()
             .and_then(|s| s.parse().ok())
-            .or_else(|| toml_config.config.chunk_overlap)
+            .or(toml_config.config.chunk_overlap)
             .unwrap_or(200); // Number of lines to overlap between chunks
 
         let enable_chunking = env::var("COMMI_ENABLE_CHUNKING")
             .ok()
             .map(|s| s.to_lowercase() == "true" || s == "1")
-            .or_else(|| toml_config.config.enable_chunking)
+            .or(toml_config.config.enable_chunking)
             .unwrap_or(true); // Enable chunking by default
 
         let validate_format = env::var("COMMI_VALIDATE_FORMAT")
             .ok()
             .map(|s| s.to_lowercase() == "true" || s == "1")
-            .or_else(|| toml_config.config.validate_format)
+            .or(toml_config.config.validate_format)
             .unwrap_or(true); // Enable validation by default
 
         // Get repository path
@@ -467,7 +467,7 @@ impl Config {
 
         if config_path.exists() {
             let content = fs::read_to_string(&config_path).context("Failed to read config file")?;
-            println!("{}", content);
+            println!("{content}");
         } else {
             println!("Configuration file not found at: {}", config_path.display());
             println!("Use 'commi config set <key> <value>' to create configuration.");
