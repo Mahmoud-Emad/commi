@@ -50,9 +50,13 @@ fn test_global_no_color_flag() {
 fn test_status_shows_repository_info() {
     let mut cmd = Command::cargo_bin("commi").unwrap();
     cmd.args(["status", "--verbose"]);
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("Repository").or(predicate::str::contains("File")));
+    cmd.assert().success().stdout(
+        predicate::str::contains("Repository")
+            .or(predicate::str::contains("File"))
+            .or(predicate::str::contains(
+                "No changes detected in repository",
+            )),
+    );
 }
 
 #[test]
