@@ -15,20 +15,16 @@ Given the following code changes, generate a commit message following these guid
 
 Example format:
 
-```text
 feat: add CPU architecture filtering
 
 - Add CPU arch filtering mechanism
 - Enable arch-based scheduling config
 - Improve resource allocation
-````
 
 Code changes:
 {diff_text}
 
-Generate only the commit message, no additional text:
-
-````
+Generate only the commit message, no additional text.
 
 Commit Types:
 
@@ -50,6 +46,6 @@ revert: Revert a previous commit
 
 Variables:
 
-* `{commit_types}`: List of conventional commit types with descriptions
-* `{retry_guidance}`: Additional guidance for retry attempts (if applicable)
-* `{diff_text}`: The actual git diff content
+- `{commit_types}`: List of conventional commit types with descriptions
+- `{retry_guidance}`: Additional guidance for retry attempts (if applicable)
+- `{diff_text}`: The actual git diff content
