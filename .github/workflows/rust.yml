@@ -3,7 +3,6 @@ name: Rust Build and Release
 on:
   push:
     branches: [ '*' ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ '*' ]
 

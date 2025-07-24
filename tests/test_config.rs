@@ -86,14 +86,22 @@ fn test_config_reset_specific_key() {
 
 #[test]
 fn test_config_validate_format_setting() {
+    use tempfile::TempDir;
+
+    // Create a unique temporary directory for this test
+    let temp_dir = TempDir::new().unwrap();
+    let test_config_path = temp_dir.path().join("commi_test_validate.toml");
+
     let mut cmd = Command::cargo_bin("commi").unwrap();
     cmd.env("COMMI_TEST_MODE", "1"); // Use test config file
+    cmd.env("COMMI_TEST_CONFIG_PATH", test_config_path.to_str().unwrap());
     cmd.args(["config", "set", "validate-format", "false"]);
     cmd.assert().success();
 
     // Check that it was set correctly
     let mut get_cmd = Command::cargo_bin("commi").unwrap();
     get_cmd.env("COMMI_TEST_MODE", "1"); // Use test config file
+    get_cmd.env("COMMI_TEST_CONFIG_PATH", test_config_path.to_str().unwrap());
     get_cmd.args(["config", "get", "validate-format"]);
     get_cmd
         .assert()

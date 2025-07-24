@@ -403,6 +403,10 @@ impl Config {
     fn get_toml_config_path() -> Result<PathBuf> {
         // Use test-specific config file when running tests
         if env::var("COMMI_TEST_MODE").is_ok() {
+            // Allow tests to specify their own config file path
+            if let Ok(test_config_path) = env::var("COMMI_TEST_CONFIG_PATH") {
+                return Ok(PathBuf::from(test_config_path));
+            }
             let temp_dir = env::temp_dir();
             return Ok(temp_dir.join("commi_test.toml"));
         }
