@@ -33,6 +33,12 @@ This is a major release that introduces a modern, professional CLI interface whi
 - **Set/get/list/reset operations** for all settings
 - **Tabular configuration display** with clean formatting
 - **Environment variable integration** (existing variables still work)
+- **New configuration options**:
+  - `validate-format` - Enable/disable AI-powered commit message validation
+  - `model` - Select AI model (gemini-1.5-flash, gemini-2.5-flash, etc.)
+  - `max-tokens` - Configure maximum tokens per API request
+  - `chunk-overlap` - Set overlap between diff chunks
+  - `enable-chunking` - Enable/disable large diff chunking
 
 #### Enhanced Safety System
 
@@ -41,6 +47,35 @@ This is a major release that introduces a modern, professional CLI interface whi
 - **Double confirmation** for destructive operations
 - **Important file detection** with warnings
 - **Force operation support** with enhanced warnings
+
+#### AI Model Management
+
+- **Model selection command**: `commi model list` to view all supported AI models
+- **Support for latest Gemini models**: gemini-1.5-flash, gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.5-pro
+- **Model descriptions and capabilities** displayed in user-friendly format
+- **Easy model switching** via `commi config set model <model-name>`
+- **Current model display** in model list output
+
+#### AI-Powered Commit Message Validation
+
+- **Intelligent commit message formatting** using AI validation
+- **Conventional Commits enforcement** with automatic correction
+- **Configurable validation**: Enable/disable via `validate-format` setting
+- **Best practices compliance**: 50-char subject, 72-char body wrapping, imperative mood
+- **Graceful fallback**: Returns original message if validation fails
+
+#### External AI Prompt System
+
+- **Externalized AI prompts** in `ai_prompts/` directory for easy customization
+- **No hardcoded prompts** in source code - all prompts are file-based
+- **Customizable prompt files**:
+  - `commit_message_generation.md` - Main commit message generation
+  - `commit_message_validation.md` - Message validation and formatting
+  - `chunk_analysis.md` - Large diff chunk analysis
+  - `chunk_combination.md` - Combining multiple chunks
+  - `project_structure_rules.md` - Development guidelines
+- **Developer-friendly**: Easy to modify prompts without code changes
+- **Error handling**: Clear messages when prompt files are missing
 
 #### Professional Color System
 
@@ -69,13 +104,16 @@ This is a major release that introduces a modern, professional CLI interface whi
 - **Migration guide** for upgrading from v3.x
 - **Shell completion guide** with installation instructions
 - **Testing guide** with comprehensive test coverage
-- **Updated README** with modern examples and features
+- **Updated README** with modern examples, validation features, and model management
 
 #### Testing Infrastructure
 
-- **40+ comprehensive tests** covering all new functionality
+- **72+ comprehensive tests** covering all new functionality
 - **Integration tests** for CLI interface and user workflows
 - **Unit tests** for individual modules and components
+- **Model management tests** for AI model selection and configuration
+- **Prompt loading tests** for external AI prompt system
+- **Validation tests** for commit message formatting
 - **Error handling tests** including "did you mean?" functionality
 - **Legacy compatibility tests** ensuring backward compatibility
 - **100% test pass rate** with continuous integration support
@@ -189,8 +227,8 @@ If you're upgrading from version 3.x, please see the [Migration Guide](MIGRATION
 
 ### Planned for v4.2
 
-- [ ] AI model selection and configuration
-- [ ] Custom prompt templates
+- [x] ~~AI model selection and configuration~~ ✅ **Completed in v4.0.0**
+- [x] ~~Custom prompt templates~~ ✅ **Completed in v4.0.0** (External AI prompt system)
 - [ ] Commit message history and favorites
 - [ ] Integration with popular Git GUIs
 - [ ] Performance benchmarking and optimization
