@@ -12,7 +12,14 @@ documentation = "https://docs.rs/commi"
 readme = "README.md"
 keywords = ["git", "commit", "ai", "gemini", "cli"]
 categories = ["command-line-utilities", "development-tools"]
-include = ["src/**/*", "docs/commi.1", "README.md", "LICENSE", "CHANGELOG.md"]
+include = [
+    "src/**/*",
+    "ai_prompts/**/*",
+    "docs/commi.1",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+]
 
 [[bin]]
 name = "commi"
