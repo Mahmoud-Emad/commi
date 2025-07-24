@@ -1,10 +1,7 @@
 #!/bin/sh
 
-# Commi Installation Script
+# Commi Installation Script - Fixed Version
 # POSIX-compliant shell script to install commi from GitHub releases
-#
-# Usage:
-#   curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/development_install/scripts/quick-install.sh | sh
 
 set -e  # Exit on any error
 
@@ -12,145 +9,137 @@ set -e  # Exit on any error
 REPO="Mahmoud-Emad/commi"
 BINARY_NAME="commi"
 INSTALL_DIR="/usr/local/bin"
-MAN_DIR="/usr/local/share/man/man1"
 GITHUB_API="https://api.github.com/repos/$REPO/releases/latest"
 
 # Logging functions
 log_info() { printf "[INFO] %s\n" "$1"; }
-log_success() { printf "[SUCCESS] %s\n" "$1"; }
-log_warning() { printf "[WARNING] %s\n" "$1"; }
 log_error() { printf "[ERROR] %s\n" "$1" >&2; }
 error_exit() { log_error "$1"; exit 1; }
+
+# Check if command exists
 command_exists() { command -v "$1" >/dev/null 2>&1; }
-is_piped() { [ ! -t 0 ]; }
 
 # Detect platform and architecture
 detect_platform() {
     case "$(uname -s)" in
         Darwin*) os="apple-darwin" ;;
-        Linux*) os="unknown-linux-gnu" ;;
-        *) error_exit "Unsupported OS: $(uname -s)" ;;
+        Linux*)  os="unknown-linux-gnu" ;;
+        *)       error_exit "Unsupported OS: $(uname -s)" ;;
     esac
-
+    
     case "$(uname -m)" in
         x86_64|amd64) arch="x86_64" ;;
         arm64|aarch64) arch="aarch64" ;;
-        *) error_exit "Unsupported arch: $(uname -m)" ;;
+        *)            error_exit "Unsupported architecture: $(uname -m)" ;;
     esac
-
+    
     echo "$arch-$os"
 }
 
-# Get latest release download URL
-get_latest_release_url() {
+# Get download URL for the platform
+get_download_url() {
     platform=$(detect_platform)
+    asset_name="$BINARY_NAME-$platform"
     tmpfile=$(mktemp)
-
+    
+    log_info "Looking for asset: $asset_name"
+    
+    # Fetch release info
     if command_exists curl; then
         curl -sSf "$GITHUB_API" > "$tmpfile" || error_exit "Failed to fetch release info"
     elif command_exists wget; then
-        wget -q -O "$tmpfile" "$GITHUB_API" || error_exit "Failed to fetch release info"
+        wget -qO- "$GITHUB_API" > "$tmpfile" || error_exit "Failed to fetch release info"
     else
         error_exit "curl or wget required"
     fi
-
-    # Debug: check if we got valid JSON
-    if [ ! -s "$tmpfile" ]; then
-        error_exit "Empty response from GitHub API"
-    fi
-
-    asset_name="$BINARY_NAME-$platform"
-
+    
+    # Parse JSON to find download URL
     if command_exists jq; then
-        url=$(jq -r ".assets[] | select(.name == \"$asset_name\") | .browser_download_url" "$tmpfile")
+        url=$(jq -r ".assets[] | select(.name == \"$asset_name\") | .browser_download_url" "$tmpfile" 2>/dev/null)
     else
-        # Fallback: find the asset name, then get the download URL from the same asset block
-        url=$(awk "/\"name\":\"$asset_name\"/{found=1} found && /\"browser_download_url\":/{gsub(/.*\"browser_download_url\":\"/, \"\"); gsub(/\".*/, \"\"); print; exit}" "$tmpfile")
+        # Simple fallback without complex awk
+        url=$(grep -A 20 "\"name\":\"$asset_name\"" "$tmpfile" | grep "browser_download_url" | head -1 | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/')
     fi
-
+    
     if [ -z "$url" ]; then
-        log_error "No binary found for asset: $asset_name"
-        printf "[ERROR] Available assets:\n" >&2
-        if command_exists jq; then
-            jq -r '.assets[].name' "$tmpfile" | while read -r name; do
-                printf "[ERROR]   - %s\n" "$name" >&2
-            done
-        else
-            grep '"name":' "$tmpfile" | sed 's/.*"name": *"\([^"]*\)".*/\1/' | while read -r name; do
-                printf "[ERROR]   - %s\n" "$name" >&2
-            done
-        fi
-        printf "[ERROR] Debug: tmpfile size: %s bytes\n" "$(wc -c < "$tmpfile")" >&2
-        printf "[ERROR] Debug: first 200 chars of response:\n" >&2
-        head -c 200 "$tmpfile" | sed 's/^/[ERROR] /' >&2
-        printf "\n" >&2
+        log_error "No binary found for: $asset_name"
+        log_error "This usually means:"
+        log_error "  1. The platform is not supported"
+        log_error "  2. The release doesn't have binaries yet"
+        log_error "  3. There's a network issue"
+        log_error ""
+        log_error "Supported platforms:"
+        log_error "  - x86_64-unknown-linux-gnu (Linux 64-bit)"
+        log_error "  - aarch64-unknown-linux-gnu (Linux ARM64)"
+        log_error "  - x86_64-apple-darwin (macOS Intel)"
+        log_error "  - aarch64-apple-darwin (macOS Apple Silicon)"
+        log_error "  - x86_64-pc-windows-msvc.exe (Windows 64-bit)"
         rm -f "$tmpfile"
-        error_exit "Binary not found"
+        error_exit "Binary not available"
     fi
-
+    
     rm -f "$tmpfile"
     echo "$url"
 }
 
-# Install binary
+# Download and install binary
 install_binary() {
     url="$1"
-    bin_tmp=$(mktemp)
-    curl -sSfL "$url" -o "$bin_tmp" || error_exit "Download failed"
-    [ ! -s "$bin_tmp" ] && error_exit "Binary is empty"
-
-    sudo mkdir -p "$INSTALL_DIR"
-    sudo cp "$bin_tmp" "$INSTALL_DIR/$BINARY_NAME"
-    sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
-    rm -f "$bin_tmp"
-    log_success "Installed commi to $INSTALL_DIR"
-}
-
-# Install man page (basic from --help)
-install_manual() {
-    [ ! -x "$INSTALL_DIR/$BINARY_NAME" ] && return
-    mkdir -p "$MAN_DIR"
-    {
-        echo ".TH COMMI 1 \"$(date +'%B %Y')\" \"commi\" \"User Commands\""
-        echo ".SH NAME"
-        echo "commi - AI-powered Git commit message generator"
-        echo ".SH SYNOPSIS"
-        echo "commi [OPTIONS]"
-        echo ".SH DESCRIPTION"
-        "$INSTALL_DIR/$BINARY_NAME" --help | sed 's/^/.TP\n/'
-    } | sudo tee "$MAN_DIR/$BINARY_NAME.1" >/dev/null || true
-    log_success "Manual page installed"
-}
-
-# Install shell completions
-install_completions() {
-    for sh in bash zsh fish; do
-        dir=""
-        case "$sh" in
-            bash) dir="/etc/bash_completion.d" ;;
-            zsh) dir="/usr/share/zsh/site-functions" ;;
-            fish) dir="/usr/share/fish/vendor_completions.d" ;;
-        esac
-        if [ -d "$dir" ]; then
-            sudo "$INSTALL_DIR/$BINARY_NAME" completion "$sh" > "$dir/${BINARY_NAME}${sh:+.}${sh}" 2>/dev/null || true
-            log_success "$sh completion installed"
-        fi
-    done
+    tmpbin=$(mktemp)
+    
+    log_info "Downloading from: $url"
+    
+    if command_exists curl; then
+        curl -sSfL "$url" -o "$tmpbin" || error_exit "Download failed"
+    elif command_exists wget; then
+        wget -qO "$tmpbin" "$url" || error_exit "Download failed"
+    fi
+    
+    # Verify download
+    if [ ! -s "$tmpbin" ]; then
+        rm -f "$tmpbin"
+        error_exit "Downloaded file is empty"
+    fi
+    
+    log_info "Installing to $INSTALL_DIR/$BINARY_NAME"
+    
+    # Install with sudo if needed
+    if [ -w "$INSTALL_DIR" ]; then
+        cp "$tmpbin" "$INSTALL_DIR/$BINARY_NAME" || error_exit "Install failed"
+        chmod +x "$INSTALL_DIR/$BINARY_NAME" || error_exit "chmod failed"
+    else
+        sudo cp "$tmpbin" "$INSTALL_DIR/$BINARY_NAME" || error_exit "Install failed (try with sudo)"
+        sudo chmod +x "$INSTALL_DIR/$BINARY_NAME" || error_exit "chmod failed"
+    fi
+    
+    rm -f "$tmpbin"
 }
 
 # Verify installation
-verify() {
-    "$BINARY_NAME" --version >/dev/null 2>&1 || "$BINARY_NAME" --help >/dev/null 2>&1 || error_exit "Verification failed"
-    log_success "Commi is working!"
+verify_installation() {
+    if ! command_exists "$BINARY_NAME"; then
+        error_exit "Installation failed: $BINARY_NAME not found in PATH"
+    fi
+    
+    log_info "Verifying installation..."
+    if "$BINARY_NAME" --version >/dev/null 2>&1 || "$BINARY_NAME" --help >/dev/null 2>&1; then
+        log_info "✅ Installation successful!"
+        log_info "Run '$BINARY_NAME --help' to get started"
+    else
+        error_exit "Installation verification failed"
+    fi
 }
 
-# Run installer
-log_info "Installing commi..."
-check_prerequisites() { command_exists curl || command_exists wget || error_exit "curl or wget is required"; }
-check_prerequisites
-url=$(get_latest_release_url)
-install_binary "$url"
-install_manual
-install_completions
-verify
-log_info "Done! Run 'commi --help' to get started."
+# Main installation
+main() {
+    log_info "Installing commi for $(detect_platform)..."
+    
+    url=$(get_download_url)
+    install_binary "$url"
+    verify_installation
+    
+    log_info "Done! Commi is ready to use."
+}
+
+# Run installation
+main
