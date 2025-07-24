@@ -7,24 +7,21 @@ This guide provides multiple ways to install commi on your system.
 ### One-line Installation
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/install.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/scripts/install.sh | sh
 ```
 
 ### Alternative Methods
 
 ```bash
 # With wget (less secure)
-wget -qO- https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/install.sh | sh
-
-# With options (no sudo, custom directory)
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/install.sh | sh -s -- --no-sudo --install-dir ~/.local/bin
+wget -qO- https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/scripts/install.sh | sh
 ```
 
 ### Download and Run
 
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/Mahmoud-Emad/commi/main/scripts/install.sh -o install.sh
 
 # Make it executable
 chmod +x install.sh
@@ -35,32 +32,7 @@ chmod +x install.sh
 
 ## Installation Options
 
-The install script supports several options:
-
-### Basic Usage
-
-```bash
-./install.sh                    # Install with default settings
-./install.sh --help             # Show help message
-./install.sh --verbose          # Enable verbose output
-```
-
-### Custom Installation Directory
-
-```bash
-# Install to user directory (no sudo required)
-./install.sh --install-dir ~/.local/bin --no-sudo
-
-# Install to custom system directory
-./install.sh --install-dir /opt/bin
-```
-
-### No Sudo Installation
-
-```bash
-# Skip operations that require sudo (manual page and system-wide completions)
-./install.sh --no-sudo --install-dir ~/.local/bin
-```
+The install script provides a simple, one-command installation.
 
 ## What the Script Does
 
