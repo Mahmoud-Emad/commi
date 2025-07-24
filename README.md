@@ -2,8 +2,6 @@
 
 [![CI](https://github.com/Mahmoud-Emad/commi/workflows/CI/badge.svg)](https://github.com/Mahmoud-Emad/commi/actions)
 [![Security](https://github.com/Mahmoud-Emad/commi/workflows/Security/badge.svg)](https://github.com/Mahmoud-Emad/commi/actions)
-[![Crates.io](https://img.shields.io/crates/v/commi.svg)](https://crates.io/crates/commi)
-[![Downloads](https://img.shields.io/crates/d/commi.svg)](https://crates.io/crates/commi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust Version](https://img.shields.io/badge/rust-1.70+-blue.svg)](https://www.rust-lang.org)
 

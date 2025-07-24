@@ -112,10 +112,34 @@ jobs:
         $VERSION = $env:GITHUB_REF -replace 'refs/tags/v', ''
         echo "VERSION=$VERSION" >> $env:GITHUB_ENV
 
-        # Create a simple changelog for Windows (awk is not available)
-        echo "## Changes in v$VERSION" > current_changelog.md
-        echo "" >> current_changelog.md
-        echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> current_changelog.md
+        # Extract changelog section for current version using PowerShell
+        $content = Get-Content CHANGELOG.md
+        $inSection = $false
+        $changelog = @()
+
+        foreach ($line in $content) {
+          if ($line -match "^## \[$VERSION\]") {
+            $inSection = $true
+            continue
+          }
+          if ($inSection -and $line -match "^## \[[0-9]") {
+            break
+          }
+          if ($inSection) {
+            $changelog += $line
+          }
+        }
+
+        # If no version-specific changelog found, create a simple one
+        if ($changelog.Count -eq 0) {
+          $changelog = @(
+            "## Changes in v$VERSION",
+            "",
+            "See [CHANGELOG.md](CHANGELOG.md) for full details."
+          )
+        }
+
+        $changelog | Out-File -FilePath current_changelog.md -Encoding utf8
 
     - name: Debug files before upload (Unix)
       if: matrix.os != 'windows-latest'
