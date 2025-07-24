@@ -16,6 +16,7 @@ jobs:
     name: Build and Upload
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         include:
           - os: ubuntu-latest
@@ -41,8 +42,22 @@ jobs:
       with:
         targets: ${{ matrix.target }}
 
+    - name: Install system dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pkg-config libssl-dev
+
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Verify binary was built
+      run: |
+        if [ ! -f "target/${{ matrix.target }}/release/${{ matrix.artifact_name }}" ]; then
+          echo "Error: Binary not found at target/${{ matrix.target }}/release/${{ matrix.artifact_name }}"
+          exit 1
+        fi
+        echo "Binary built successfully: $(ls -la target/${{ matrix.target }}/release/${{ matrix.artifact_name }})"
 
     - name: Strip binary (Linux and macOS)
       if: matrix.os != 'windows-latest'
@@ -52,6 +67,7 @@ jobs:
       run: |
         mkdir -p release-assets
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
+        echo "Asset prepared: $(ls -la release-assets/${{ matrix.asset_name }})"
 
     - name: Extract changelog for current version
       run: |
@@ -70,6 +86,15 @@ jobs:
           echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> current_changelog.md
         fi
 
+    - name: Debug files before upload
+      run: |
+        echo "Files to upload:"
+        ls -la release-assets/
+        ls -la CHANGELOG.md current_changelog.md
+        echo "Asset name: ${{ matrix.asset_name }}"
+        echo "Target: ${{ matrix.target }}"
+        echo "OS: ${{ matrix.os }}"
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
       env:
@@ -81,6 +106,7 @@ jobs:
         body_path: current_changelog.md
         draft: false
         prerelease: false
+        fail_on_unmatched_files: true
 
   # publish-crate:
   #   name: Publish to crates.io
