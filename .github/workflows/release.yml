@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -50,33 +53,55 @@ jobs:
         mkdir -p release-assets
         cp target/${{ matrix.target }}/release/${{ matrix.artifact_name }} release-assets/${{ matrix.asset_name }}
 
+    - name: Extract changelog for current version
+      run: |
+        # Extract the current version from the tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+        # Extract changelog section for current version
+        # Match patterns like "## [4.0.0]" or "## [v4.0.0]"
+        awk "/^## \[$VERSION\]/ {flag=1; next} /^## \[[0-9]/ {flag=0} flag" CHANGELOG.md > current_changelog.md
+
+        # If no version-specific changelog found, create a simple one
+        if [ ! -s current_changelog.md ]; then
+          echo "## Changes in v$VERSION" > current_changelog.md
+          echo "" >> current_changelog.md
+          echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> current_changelog.md
+        fi
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: release-assets/${{ matrix.asset_name }}
+        files: |
+          release-assets/${{ matrix.asset_name }}
+          CHANGELOG.md
+        body_path: current_changelog.md
+        draft: false
+        prerelease: false
 
-  publish-crate:
-    name: Publish to crates.io
-    needs: build-and-upload
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@stable
-    - name: Publish to crates.io
-      run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      continue-on-error: true  # Don't fail entire release if crates.io fails
+  # publish-crate:
+  #   name: Publish to crates.io
+  #   needs: build-and-upload
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: dtolnay/rust-toolchain@stable
+  #   - name: Publish to crates.io
+  #     run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+  #     continue-on-error: true  # Don't fail entire release if crates.io fails
 
-  update-homebrew:
-    name: Update Homebrew Formula
-    needs: [build-and-upload, publish-crate]
-    runs-on: ubuntu-latest
-    if: always()  # Run even if publish-crate fails
-    steps:
-    - name: Update Homebrew formula
-      uses: dawidd6/action-homebrew-bump-formula@v3
-      with:
-        token: ${{ secrets.HOMEBREW_TOKEN }}
-        formula: commi
-      continue-on-error: true  # Don't fail if Homebrew update fails
+  # update-homebrew:
+  #   name: Update Homebrew Formula
+  #   needs: [build-and-upload, publish-crate]
+  #   runs-on: ubuntu-latest
+  #   if: always()  # Run even if publish-crate fails
+  #   steps:
+  #   - name: Update Homebrew formula
+  #     uses: dawidd6/action-homebrew-bump-formula@v3
+  #     with:
+  #       token: ${{ secrets.HOMEBREW_TOKEN }}
+  #       formula: commi
+  #     continue-on-error: true  # Don't fail if Homebrew update fails

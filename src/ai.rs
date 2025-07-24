@@ -440,8 +440,7 @@ impl GeminiClient {
         self.load_chunk_analysis_prompt(chunk, chunk_num, total_chunks)
             .unwrap_or_else(|e| {
                 log::error!("Failed to load chunk analysis prompt: {e}");
-                log::error!("Please ensure the file 'ai_prompts/chunk_analysis.md' exists and contains a valid prompt");
-                "Error: Could not load chunk analysis prompt from ai_prompts/chunk_analysis.md. Please check if the file exists and is properly formatted.".to_string()
+                "Error: Could not load chunk analysis prompt. Please check the embedded prompt content.".to_string()
             })
     }
 
@@ -460,8 +459,7 @@ impl GeminiClient {
         let combine_prompt = self.load_chunk_combination_prompt(&combined_descriptions)
             .unwrap_or_else(|e| {
                 log::error!("Failed to load chunk combination prompt: {e}");
-                log::error!("Please ensure the file 'ai_prompts/chunk_combination.md' exists and contains a valid prompt");
-                "Error: Could not load chunk combination prompt from ai_prompts/chunk_combination.md. Please check if the file exists and is properly formatted.".to_string()
+                "Error: Could not load chunk combination prompt. Please check the embedded prompt content.".to_string()
             });
 
         // Send the combine prompt to the AI
@@ -672,8 +670,7 @@ impl GeminiClient {
         self.load_commit_message_generation_prompt(diff_text, retry_guidance, &commit_types)
             .unwrap_or_else(|e| {
                 log::error!("Failed to load commit message generation prompt: {e}");
-                log::error!("Please ensure the file 'ai_prompts/commit_message_generation.md' exists and contains a valid prompt");
-                "Error: Could not load commit message generation prompt from ai_prompts/commit_message_generation.md. Please check if the file exists and is properly formatted.".to_string()
+                "Error: Could not load commit message generation prompt. Please check the embedded prompt content.".to_string()
             })
     }
 
@@ -764,102 +761,68 @@ impl GeminiClient {
         Ok(validated_message)
     }
 
-    /// Load validation prompt from external file
+    /// Load validation prompt from embedded content
     fn load_validation_prompt(&self, message: &str) -> Result<String> {
-        // Try to load the prompt from the ai_prompts directory
-        let prompt_path = std::path::Path::new("ai_prompts/commit_message_validation.md");
+        // Load the prompt from embedded content
+        let content = include_str!("../ai_prompts/commit_message_validation.md");
 
-        if prompt_path.exists() {
-            let content = std::fs::read_to_string(prompt_path)
-                .context("Failed to read validation prompt file")?;
-
-            // Replace the placeholder with the actual message
-            let prompt = content.replace("{commit_message}", message);
-            return Ok(prompt);
-        }
-
-        // Return error if file doesn't exist or can't be parsed
-        log::error!(
-            "Could not load validation prompt from ai_prompts/commit_message_validation.md"
-        );
-        log::error!("Please ensure the file exists and contains a valid prompt");
-        Err(anyhow::anyhow!(
-            "Error: Could not load validation prompt from ai_prompts/commit_message_validation.md. Please check if the file exists and is properly formatted."
-        ))
+        // Replace the placeholder with the actual message
+        let prompt = content.replace("{commit_message}", message);
+        Ok(prompt)
     }
 
-    /// Load chunk analysis prompt from external file
+    /// Load chunk analysis prompt from embedded content
     fn load_chunk_analysis_prompt(
         &self,
         chunk: &str,
         chunk_num: usize,
         total_chunks: usize,
     ) -> Result<String> {
-        let prompt_path = std::path::Path::new("ai_prompts/chunk_analysis.md");
+        // Load the prompt from embedded content
+        let content = include_str!("../ai_prompts/chunk_analysis.md");
 
-        if prompt_path.exists() {
-            let content = std::fs::read_to_string(prompt_path)
-                .context("Failed to read chunk analysis prompt file")?;
+        // Replace placeholders with actual values
+        let prompt = content
+            .replace("{chunk_num}", &chunk_num.to_string())
+            .replace("{total_chunks}", &total_chunks.to_string())
+            .replace("{chunk}", chunk);
 
-            // Replace placeholders with actual values
-            let prompt = content
-                .replace("{chunk_num}", &chunk_num.to_string())
-                .replace("{total_chunks}", &total_chunks.to_string())
-                .replace("{chunk}", chunk);
-
-            return Ok(prompt);
-        }
-
-        Err(anyhow::anyhow!("Could not load chunk analysis prompt"))
+        Ok(prompt)
     }
 
-    /// Load chunk combination prompt from external file
+    /// Load chunk combination prompt from embedded content
     fn load_chunk_combination_prompt(&self, chunk_descriptions: &str) -> Result<String> {
-        let prompt_path = std::path::Path::new("ai_prompts/chunk_combination.md");
+        // Load the prompt from embedded content
+        let content = include_str!("../ai_prompts/chunk_combination.md");
 
-        if prompt_path.exists() {
-            let content = std::fs::read_to_string(prompt_path)
-                .context("Failed to read chunk combination prompt file")?;
-
-            // Replace placeholder with actual descriptions
-            let prompt = content.replace("{chunk_descriptions}", chunk_descriptions);
-            return Ok(prompt);
-        }
-
-        Err(anyhow::anyhow!("Could not load chunk combination prompt"))
+        // Replace placeholder with actual descriptions
+        let prompt = content.replace("{chunk_descriptions}", chunk_descriptions);
+        Ok(prompt)
     }
 
-    /// Load commit message generation prompt from external file
+    /// Load commit message generation prompt from embedded content
     fn load_commit_message_generation_prompt(
         &self,
         diff_text: &str,
         retry_guidance: &str,
         commit_types: &[(&str, &str)],
     ) -> Result<String> {
-        let prompt_path = std::path::Path::new("ai_prompts/commit_message_generation.md");
+        // Load the prompt from embedded content
+        let content = include_str!("../ai_prompts/commit_message_generation.md");
 
-        if prompt_path.exists() {
-            let content = std::fs::read_to_string(prompt_path)
-                .context("Failed to read commit message generation prompt file")?;
+        let formatted_types = commit_types
+            .iter()
+            .map(|(t, d)| format!("   {t}: {d}"))
+            .collect::<Vec<_>>()
+            .join("\n");
 
-            let formatted_types = commit_types
-                .iter()
-                .map(|(t, d)| format!("   {t}: {d}"))
-                .collect::<Vec<_>>()
-                .join("\n");
+        // Replace placeholders with actual values
+        let prompt = content
+            .replace("{commit_types}", &formatted_types)
+            .replace("{retry_guidance}", retry_guidance)
+            .replace("{diff_text}", diff_text);
 
-            // Replace placeholders with actual values
-            let prompt = content
-                .replace("{commit_types}", &formatted_types)
-                .replace("{retry_guidance}", retry_guidance)
-                .replace("{diff_text}", diff_text);
-
-            return Ok(prompt);
-        }
-
-        Err(anyhow::anyhow!(
-            "Could not load commit message generation prompt"
-        ))
+        Ok(prompt)
     }
 }
 
