@@ -59,13 +59,17 @@ fn test_update_install_help_shows_force_option() {
 #[test]
 fn test_legacy_update_flag() {
     let mut cmd = Command::cargo_bin("commi").unwrap();
+    cmd.env("COMMI_TEST_MODE", "1"); // Use test mode to avoid network calls
     cmd.arg("--update");
     cmd.assert()
-        .failure() // Update may fail due to network/platform issues in CI
+        .success() // Should succeed in test mode
         .stderr(predicate::str::contains(
             "Warning: You are using the legacy CLI",
         ))
-        .stderr(predicate::str::contains("Consider migrating"));
+        .stderr(predicate::str::contains("Consider migrating"))
+        .stderr(predicate::str::contains(
+            "You're already running the latest version",
+        ));
 }
 
 #[test]
