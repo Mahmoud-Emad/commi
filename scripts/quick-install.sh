@@ -54,13 +54,27 @@ get_latest_release_url() {
         error_exit "curl or wget required"
     fi
 
+    asset_name="$BINARY_NAME-$platform"
+
     if command_exists jq; then
-        url=$(jq -r ".assets[] | select(.name == \"$BINARY_NAME-$platform\") | .browser_download_url" "$tmpfile")
+        url=$(jq -r ".assets[] | select(.name == \"$asset_name\") | .browser_download_url" "$tmpfile")
     else
-        url=$(grep "name.*$platform" "$tmpfile" -A 10 | grep browser_download_url | head -1 | sed 's/.*: \"\(.*\)\".*/\1/')
+        url=$(grep "\"name\":\"$asset_name\"" "$tmpfile" -A 10 | grep browser_download_url | head -1 | sed 's/.*: \"\(.*\)\".*/\1/')
     fi
+
+    if [ -z "$url" ]; then
+        log_error "No binary found for asset: $asset_name"
+        log_error "Available assets:"
+        if command_exists jq; then
+            jq -r '.assets[].name' "$tmpfile" | sed 's/^/  - /'
+        else
+            grep '"name":' "$tmpfile" | sed 's/.*"name": *"\([^"]*\)".*/  - \1/'
+        fi
+        rm -f "$tmpfile"
+        error_exit "Binary not found"
+    fi
+
     rm -f "$tmpfile"
-    [ -z "$url" ] && error_exit "No binary for $platform"
     echo "$url"
 }
 
