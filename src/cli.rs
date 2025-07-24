@@ -179,4 +179,3 @@ pub struct LegacyArgs {
 
 // For backward compatibility, keep the old Args type alias
 pub type Args = LegacyArgs;
-
