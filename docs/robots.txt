@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://commi.sh/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Allow all search engines to index the site
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block access to sensitive files
+Disallow: /js/
+Disallow: /css/
+Disallow: /*.js$
+Disallow: /*.css$
+
+# Allow access to main content
+Allow: /index.html
+Allow: /pages/
