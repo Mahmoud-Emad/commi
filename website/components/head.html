@@ -1,0 +1,112 @@
+<!-- Common head elements for all pages -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Mahmoud Emad">
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- TailwindCSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="css/styles.css?v=3">
+
+<!-- Force light gray code blocks -->
+<style>
+  /* Target parent containers, not code elements directly */
+  .code-block,
+  .bg-gray-900,
+  .bg-black,
+  div[class*="bg-gray-9"],
+  div[class*="bg-black"],
+  pre {
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+  }
+
+  .code-content,
+  .code-block .code-content,
+  div[class*="bg-gray-8"] {
+    background: #f9fafb !important;
+    color: #374151 !important;
+  }
+
+  /* Dark mode */
+  .dark .code-block,
+  .dark .bg-gray-900,
+  .dark .bg-black,
+  .dark div[class*="bg-gray-9"],
+  .dark div[class*="bg-black"],
+  .dark pre {
+    background: #1a1a1a !important;
+    border: 1px solid #374151 !important;
+    color: #e5e7eb !important;
+  }
+
+  .dark .code-content,
+  .dark .code-block .code-content,
+  .dark div[class*="bg-gray-8"] {
+    background: #1a1a1a !important;
+    color: #e5e7eb !important;
+  }
+
+  /* Override any Tailwind background classes on code containers */
+  [class*="bg-gray-9"]:has(code),
+  [class*="bg-black"]:has(code),
+  div:has(code) {
+    background: #f3f4f6 !important;
+  }
+
+  .dark [class*="bg-gray-9"]:has(code),
+  .dark [class*="bg-black"]:has(code),
+  .dark div:has(code) {
+    background: #1a1a1a !important;
+  }
+
+  /* Inline code styling */
+  code {
+    background: transparent !important;
+    color: inherit !important;
+  }
+</style>
+
+<!-- Theme initialization script (runs before page render) -->
+<script>
+  // Apply theme immediately to prevent flash
+  (function () {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+
+<!-- Tailwind Configuration -->
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'commi-cyan': '#06b6d4',
+          'commi-green': '#10b981',
+          'commi-yellow': '#f59e0b',
+          'commi-red': '#ef4444',
+          'commi-dark': '#0f172a',
+          'commi-light': '#f8fafc'
+        },
+        fontFamily: {
+          'sans': ['Inter', 'system-ui', 'sans-serif']
+        }
+      }
+    },
+    darkMode: 'class'
+  }
+</script>
