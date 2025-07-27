@@ -59,7 +59,7 @@ commi generate --commit                 # Auto-commit with message
 
 # Configuration
 commi config set api-key "your_key"     # Set API key
-commi config list                       # List all settings
+commi config get                       # List all settings
 
 # AI Models
 commi model list                        # List supported models
